@@ -1,0 +1,361 @@
+:root {
+  --screen-bg: #041106;
+  --panel-bg: rgba(7, 25, 9, 0.82);
+  --line: rgba(73, 255, 131, 0.18);
+  --glow: #9affb0;
+  --bright: #dcffe3;
+  --dim: #4eb163;
+  --warn: #d0f96a;
+  --alert: #ff8779;
+  --shadow: rgba(0, 0, 0, 0.55);
+  --font-terminal: "Courier New", "Lucida Console", monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background:
+    radial-gradient(circle at top, rgba(40, 107, 52, 0.18), transparent 40%),
+    linear-gradient(180deg, #020603 0%, #041006 50%, #010302 100%);
+  color: var(--glow);
+  font-family: var(--font-terminal);
+}
+
+body {
+  overflow: hidden;
+}
+
+.crt-shell {
+  position: relative;
+  min-height: 100vh;
+  padding: 1.25rem;
+  background:
+    radial-gradient(circle at center, rgba(78, 177, 99, 0.12), transparent 48%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.35), transparent 20%, rgba(0, 0, 0, 0.55) 100%);
+  animation: screenPulse 6s infinite ease-in-out;
+}
+
+.crt-overlay,
+.screen-noise {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+}
+
+.crt-overlay {
+  background:
+    linear-gradient(rgba(12, 31, 14, 0) 50%, rgba(0, 0, 0, 0.22) 50%),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.04), rgba(78, 177, 99, 0.03), rgba(0, 0, 0, 0.05));
+  background-size: 100% 5px, 3px 100%;
+  mix-blend-mode: screen;
+  opacity: 0.34;
+}
+
+.screen-noise {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.08) 0.5px, transparent 0.5px);
+  background-size: 4px 4px;
+  opacity: 0.06;
+  animation: flicker 0.16s infinite alternate;
+}
+
+.topbar {
+  position: relative;
+  z-index: 6;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  border: 1px solid rgba(136, 255, 158, 0.16);
+  background: rgba(3, 12, 5, 0.72);
+  padding: 0.85rem 1rem;
+  box-shadow: 0 0 36px rgba(62, 182, 84, 0.12);
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.brand-mark {
+  font-size: clamp(1.2rem, 2.6vw, 2rem);
+  letter-spacing: 0.4rem;
+  color: var(--bright);
+  text-shadow: 0 0 15px rgba(136, 255, 158, 0.68);
+}
+
+.brand-sub {
+  color: var(--dim);
+  font-size: 0.82rem;
+  letter-spacing: 0.16rem;
+}
+
+.brand-version {
+  color: rgba(154, 255, 176, 0.72);
+  font-size: 0.74rem;
+  letter-spacing: 0.18rem;
+}
+
+.topbar-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.panel-button {
+  border: 1px solid rgba(136, 255, 158, 0.26);
+  background: rgba(7, 28, 12, 0.82);
+  color: var(--bright);
+  padding: 0.7rem 0.9rem;
+  cursor: pointer;
+  font: inherit;
+  letter-spacing: 0.12rem;
+}
+
+.panel-button:hover,
+.panel-button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 14px rgba(136, 255, 158, 0.16);
+}
+
+.voice-menu {
+  position: relative;
+  z-index: 7;
+}
+
+.voice-menu summary {
+  list-style: none;
+}
+
+.voice-menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.voice-menu-panel {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  z-index: 8;
+  margin-top: 0.45rem;
+  min-width: 15rem;
+  border: 1px solid rgba(136, 255, 158, 0.22);
+  background: rgba(3, 12, 5, 0.96);
+  padding: 0.85rem;
+  display: grid;
+  gap: 0.8rem;
+  box-shadow: 0 0 18px rgba(0, 0, 0, 0.34);
+}
+
+.voice-control {
+  display: grid;
+  gap: 0.35rem;
+  color: var(--bright);
+  font-size: 0.82rem;
+  letter-spacing: 0.12rem;
+}
+
+.voice-control input[type="range"] {
+  width: 100%;
+  accent-color: var(--glow);
+}
+
+.voice-control output {
+  color: var(--dim);
+}
+
+.terminal-layout {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(240px, 300px) 1fr;
+  gap: 1rem;
+  margin-top: 1rem;
+  height: calc(100vh - 7.2rem);
+}
+
+.status-panel,
+.terminal-panel {
+  border: 1px solid rgba(136, 255, 158, 0.15);
+  background: var(--panel-bg);
+  box-shadow: inset 0 0 22px rgba(0, 0, 0, 0.36), 0 0 26px rgba(0, 0, 0, 0.18);
+}
+
+.status-panel {
+  padding: 1rem;
+  overflow: auto;
+}
+
+.status-block + .status-block {
+  margin-top: 1.2rem;
+}
+
+.status-block h2 {
+  margin: 0 0 0.8rem;
+  color: var(--bright);
+  font-size: 0.94rem;
+  letter-spacing: 0.18rem;
+}
+
+.status-block div {
+  color: var(--dim);
+  line-height: 1.6;
+  white-space: pre-line;
+}
+
+.terminal-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  position: relative;
+}
+
+.boot-curtain {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at center, rgba(43, 114, 53, 0.18), transparent 45%),
+    rgba(2, 10, 4, 0.96);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  z-index: 4;
+  padding: 2rem;
+  transition: opacity 800ms ease, visibility 800ms ease;
+}
+
+.boot-curtain.hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.boot-title {
+  font-size: clamp(2.6rem, 10vw, 5rem);
+  letter-spacing: 0.8rem;
+  color: var(--bright);
+  text-shadow: 0 0 36px rgba(136, 255, 158, 0.53);
+}
+
+.boot-subtitle {
+  font-size: 0.9rem;
+  color: var(--dim);
+  letter-spacing: 0.3rem;
+  text-align: center;
+}
+
+.boot-log {
+  width: min(46rem, 100%);
+  min-height: 10rem;
+  border: 1px solid rgba(136, 255, 158, 0.18);
+  padding: 1rem;
+  line-height: 1.7;
+  background: rgba(3, 12, 5, 0.72);
+}
+
+.terminal-output {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 1.25rem;
+  line-height: 1.55;
+  scrollbar-width: thin;
+  color: var(--glow);
+}
+
+.terminal-line {
+  white-space: pre-wrap;
+  margin-bottom: 0.32rem;
+  text-shadow: 0 0 12px rgba(82, 202, 103, 0.27);
+}
+
+.terminal-line.system {
+  color: var(--bright);
+}
+
+.terminal-line.warn {
+  color: var(--warn);
+}
+
+.terminal-line.alert {
+  color: var(--alert);
+}
+
+.command-form {
+  border-top: 1px solid rgba(136, 255, 158, 0.12);
+  padding: 1rem 1.25rem 0.75rem;
+}
+
+.command-line {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.prompt-prefix {
+  color: var(--bright);
+  white-space: nowrap;
+}
+
+.command-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--bright);
+  font: inherit;
+  letter-spacing: 0.04rem;
+}
+
+.command-hints {
+  padding: 0 1.25rem 1rem;
+  color: rgba(136, 255, 158, 0.66);
+  font-size: 0.82rem;
+}
+
+@media (max-width: 920px) {
+  body {
+    overflow: auto;
+  }
+
+  .crt-shell {
+    min-height: 100vh;
+  }
+
+  .terminal-layout {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+
+  .status-panel {
+    max-height: none;
+  }
+
+  .terminal-panel {
+    min-height: 70vh;
+  }
+}
+
+@keyframes flicker {
+  from {
+    opacity: 0.04;
+  }
+  to {
+    opacity: 0.08;
+  }
+}
+
+@keyframes screenPulse {
+  0%, 100% {
+    filter: brightness(0.98);
+  }
+  50% {
+    filter: brightness(1.02);
+  }
+}

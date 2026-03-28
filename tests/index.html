@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BOCK Tests</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 24px;
+      background: #061108;
+      color: #b6ffc4;
+      font-family: "Courier New", monospace;
+    }
+
+    .pass { color: #b6ffc4; }
+    .fail { color: #ff8d7a; }
+    code { color: #edff99; }
+  </style>
+</head>
+<body>
+  <h1>BOCK Browser Tests</h1>
+  <div id="results"></div>
+  <script type="module">
+    import { executeCommand, parseCommand } from "../src/core/commands.js";
+    import { handleGameCommand, startGame } from "../src/core/games.js";
+    import { getTabCompletion, navigateHistory, pushHistory } from "../src/core/shellInput.js";
+    import { createInitialState } from "../src/core/state.js";
+
+    const results = document.querySelector("#results");
+    let failures = 0;
+
+    function test(name, fn) {
+      try {
+        fn();
+        render(name, true);
+      } catch (error) {
+        failures += 1;
+        render(`${name} :: ${error.message}`, false);
+      }
+    }
+
+    function expect(condition, message) {
+      if (!condition) {
+        throw new Error(message);
+      }
+    }
+
+    function render(message, pass) {
+      const row = document.createElement("div");
+      row.className = pass ? "pass" : "fail";
+      row.textContent = `${pass ? "PASS" : "FAIL"} :: ${message}`;
+      results.appendChild(row);
+    }
+
+    test("parseCommand lowercases the command and keeps args", () => {
+      const parsed = parseCommand("LOGIN ORCHID-7");
+      expect(parsed.command === "login", "command should be lowercased");
+      expect(parsed.args[0] === "ORCHID-7", "args should be preserved");
+    });
+
+    test("guest can discover the first token and elevate to operator", () => {
+      const state = createInitialState();
+      executeCommand(state, "connect north-shore-relay");
+      const result = executeCommand(state, "login orchid-7");
+      expect(result.lines[0].includes("AUTHORITY ELEVATED"), "expected promotion message");
+      expect(state.profile === "operator", "profile should advance to operator");
+    });
+
+    test("world theater remains sealed before strategic access", () => {
+      const state = createInitialState();
+      const result = executeCommand(state, "play world_theater");
+      expect(result.lines[0].includes("sealed"), "simulation should be inaccessible");
+    });
+
+    test("status output stays silent", () => {
+      const state = createInitialState();
+      const result = executeCommand(state, "status");
+      expect(Array.isArray(result.voiceLines), "voiceLines should be present");
+      expect(result.voiceLines.length === 0, "status should not produce conversational voice");
+    });
+
+    test("signal hunt resets when the wrong node is traced", () => {
+      const state = createInitialState();
+      executeCommand(state, "connect north-shore-relay");
+      executeCommand(state, "login orchid-7");
+      executeCommand(state, "play signal_hunt");
+      executeCommand(state, "trace wrong-node");
+      expect(state.gameState.hops.length === 0, "hops should reset on incorrect trace");
+    });
+
+    test("signal hunt guidance is marked for speech", () => {
+      const result = handleGameCommand(startGame("signal_hunt"), "look");
+      expect(result.voiceLines.includes("Use trace node to pursue the ghost signal."), "guidance should be spoken");
+    });
+
+    test("history is limited to ten entries", () => {
+      let history = [];
+      for (let index = 0; index < 12; index += 1) {
+        history = pushHistory(history, `cmd-${index}`, 10);
+      }
+      expect(history.length === 10, "history should cap at ten entries");
+      expect(history[0] === "cmd-2", "oldest entries should be dropped first");
+    });
+
+    test("history navigation returns to the in-progress draft", () => {
+      const history = ["help", "scan", "status"];
+      const older = navigateHistory(history, "loa", null, "up");
+      const newer = navigateHistory(history, older.nextDraft, older.nextIndex, "down");
+      const restored = navigateHistory(history, newer.nextDraft, newer.nextIndex, "down");
+      expect(restored.nextValue === "loa", "draft input should be restored after walking history");
+    });
+
+    test("tab completion expands command names", () => {
+      const state = createInitialState();
+      const completed = getTabCompletion(state, "sta");
+      expect(completed === "status ", "command completion should expand uniquely");
+    });
+
+    test("tab completion expands game guidance targets", () => {
+      const state = createInitialState();
+      state.currentGame = "signal_hunt";
+      const completed = getTabCompletion(state, "trace gh");
+      expect(completed === "trace ghost-array ", "game argument completion should expand uniquely");
+    });
+
+    test("save command writes to IO adapter", () => {
+      const state = createInitialState();
+      let saved = "";
+      executeCommand(state, "save", {
+        save(key, value) {
+          saved = `${key}:${value}`;
+        },
+        load() {
+          return null;
+        },
+      });
+      expect(saved.includes("bock-save-state-v1"), "save key should be used");
+    });
+
+    test("voice channel defaults to off for restored sessions", () => {
+      const state = createInitialState();
+      expect(state.voiceEnabled === false, "voice should default to off");
+    });
+
+    test("voice controls have stable default tuning", () => {
+      const state = createInitialState();
+      expect(state.voiceRate === 1.15, "voice rate should have a default");
+      expect(state.voicePitch === 0.70, "voice pitch should have a default");
+    });
+
+    test("cheap cheap login unlocks level infinity from omega", () => {
+      const state = createInitialState();
+      state.profile = "omega";
+      const result = executeCommand(state, "login cheap cheap");
+      expect(state.profile === "infinity", "profile should advance to infinity");
+      expect(result.lines[0].includes("LEVEL ∞"), "infinity boot message should be shown");
+      expect(state.infinityBotName === "Cheap Cheap", "cheap cheap persona should be stored");
+    });
+
+    test("cheap cheap chats and invites the player back to games", () => {
+      const state = createInitialState();
+      state.profile = "infinity";
+      state.cheapCheapTurns = 1;
+      state.infinityBotName = "Cheap Cheap";
+      state.infinityUserName = "Professor Bock Bock";
+      const result = executeCommand(state, "tell me about war");
+      expect(result.lines[0].includes("War"), "chat response should discuss the prompt");
+      expect(result.lines[1].includes("play a game"), "chat bot should invite the player to a game regularly");
+    });
+
+    test("alternate infinity token swaps names", () => {
+      const state = createInitialState();
+      state.profile = "omega";
+      executeCommand(state, "login whiskey business");
+      expect(state.infinityBotName === "Woodford", "bot name should follow the token");
+      expect(state.infinityUserName === "Chief Imbibing Officer", "user name should follow the token");
+    });
+
+    test("joshua trap demotes to guest", () => {
+      const state = createInitialState();
+      state.profile = "omega";
+      const result = executeCommand(state, "login Joshua");
+      expect(state.profile === "guest", "joshua should demote the user");
+      expect(result.lines[0].includes("Professor Falken"), "trap message should be shown");
+    });
+
+    test("games library includes chess", () => {
+      const state = createInitialState();
+      state.profile = "operator";
+      const result = executeCommand(state, "games");
+      expect(result.lines.some((line) => line.toLowerCase().includes("chess")), "games list should include chess");
+    });
+
+    test("tic tac toe marks the board", () => {
+      const result = handleGameCommand(startGame("tic_tac_toe"), "mark b2");
+      expect(result.lines[0].includes("X"), "board should render the player's mark");
+    });
+
+    test("infinity bot handles plain english identity questions", () => {
+      const state = createInitialState();
+      state.profile = "infinity";
+      state.infinityBotName = "Woodford";
+      state.infinityUserName = "Chief Imbibing Officer";
+      const result = executeCommand(state, "who am i?");
+      expect(result.lines[0].includes("Chief Imbibing Officer"), "bot should answer identity questions");
+    });
+
+    test("infinity bot handles plain english play requests", () => {
+      const state = createInitialState();
+      state.profile = "infinity";
+      state.infinityBotName = "SPARCy";
+      state.infinityUserName = "Professor Barger";
+      const result = executeCommand(state, "please play poker with me");
+      expect(result.lines[0].toLowerCase().includes("poker"), "bot should respond to natural play requests");
+    });
+
+    const summary = document.createElement("p");
+    summary.innerHTML = failures === 0
+      ? "All tests passed."
+      : `<strong>${failures}</strong> test(s) failed.`;
+    results.appendChild(summary);
+  </script>
+</body>
+</html>

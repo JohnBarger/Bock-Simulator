@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BOCK :: Battle Operations Command Kernel</title>
+  <link rel="stylesheet" href="./src/style.css">
+</head>
+<body>
+  <div id="app" class="crt-shell">
+    <div class="crt-overlay"></div>
+    <div class="screen-noise"></div>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark">BOCK</span>
+        <span class="brand-sub">Battle Operations Command Kernel</span>
+        <span id="version-output" class="brand-version">VER 26.3.28.1</span>
+      </div>
+      <div class="topbar-actions">
+        <button id="sound-toggle" class="panel-button" type="button" aria-pressed="true">SOUND ON</button>
+        <button id="voice-toggle" class="panel-button" type="button" aria-pressed="false">VOICE OFF</button>
+        <details id="voice-menu" class="voice-menu">
+          <summary class="panel-button">VOICE MENU</summary>
+          <div class="voice-menu-panel">
+            <label class="voice-control" for="voice-rate">
+              <span>SPEED</span>
+              <input id="voice-rate" type="range" min="0.7" max="2" step="0.05" value="1.15">
+              <output id="voice-rate-value" for="voice-rate">1.15x</output>
+            </label>
+            <label class="voice-control" for="voice-pitch">
+              <span>PITCH</span>
+              <input id="voice-pitch" type="range" min="0.3" max="1.2" step="0.05" value="0.70">
+              <output id="voice-pitch-value" for="voice-pitch">0.70</output>
+            </label>
+          </div>
+        </details>
+        <button id="demo-toggle" class="panel-button" type="button">DEMO MODE</button>
+      </div>
+    </header>
+
+    <main class="terminal-layout">
+      <aside class="status-panel">
+        <section class="status-block">
+          <h2>Operational Frame</h2>
+          <div id="clock-output"></div>
+          <div id="profile-output"></div>
+          <div id="theater-output"></div>
+        </section>
+
+        <section class="status-block">
+          <h2>Subsystems</h2>
+          <div id="subsystems-output"></div>
+        </section>
+
+        <section class="status-block">
+          <h2>Recovered Access</h2>
+          <div id="unlock-output"></div>
+        </section>
+      </aside>
+
+      <section class="terminal-panel" aria-label="BOCK terminal">
+        <div id="boot-curtain" class="boot-curtain">
+          <div class="boot-title">BOCK</div>
+          <div class="boot-subtitle">Battle Operations Command Kernel</div>
+          <div id="boot-log" class="boot-log"></div>
+        </div>
+
+        <div id="terminal-output" class="terminal-output" aria-live="polite"></div>
+
+        <form id="command-form" class="command-form" autocomplete="off">
+          <label class="command-line" for="command-input">
+            <span id="prompt-prefix" class="prompt-prefix">GUEST@BOCK:&gt;</span>
+            <input id="command-input" class="command-input" name="command" spellcheck="false" autocomplete="off" autofocus>
+          </label>
+        </form>
+
+        <div class="command-hints">
+          <span>Commands: `help`, `login`, `dir`, `connect`, `scan`, `games`, `play`, `status`, `save`, `load`, `logout`, `clear`</span>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

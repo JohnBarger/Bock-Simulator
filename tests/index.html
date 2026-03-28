@@ -191,6 +191,25 @@
       expect(result.lines[0].includes("Professor Falken"), "trap message should be shown");
     });
 
+    test("secret token uses first five characters and does not elevate", () => {
+      const state = createInitialState();
+      const result = executeCommand(state, "login powerwagon");
+      expect(state.profile === "guest", "secret token should not promote or demote");
+      expect(result.lines[0].includes("Greetings PowerDriven"), "secret token message should be returned");
+    });
+
+    test("short secret token ignores trailing words", () => {
+      const state = createInitialState();
+      const result = executeCommand(state, "login jon go GenX GrownUp");
+      expect(result.lines[0].includes("Greetings Jon of GenX Grownup"), "short token should match regardless of extra text");
+    });
+
+    test("longer short token beats shorter token prefixes", () => {
+      const state = createInitialState();
+      const result = executeCommand(state, "login monk");
+      expect(result.lines[0].includes("Greetings Monk"), "monk should not be captured by mo prefix");
+    });
+
     test("games library includes chess", () => {
       const state = createInitialState();
       state.profile = "operator";

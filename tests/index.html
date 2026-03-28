@@ -124,6 +124,12 @@
       expect(completed === "trace ghost-array ", "game argument completion should expand uniquely");
     });
 
+    test("login tokens are not tab-completed", () => {
+      const state = createInitialState();
+      const completed = getTabCompletion(state, "login ch");
+      expect(completed === null, "login token completion should stay disabled");
+    });
+
     test("save command writes to IO adapter", () => {
       const state = createInitialState();
       let saved = "";
@@ -149,20 +155,20 @@
       expect(state.voicePitch === 0.70, "voice pitch should have a default");
     });
 
-    test("cheap cheap login unlocks level infinity from omega", () => {
+    test("cheep cheep login unlocks level infinity from omega", () => {
       const state = createInitialState();
       state.profile = "omega";
-      const result = executeCommand(state, "login cheap cheap");
+      const result = executeCommand(state, "login cheep cheep");
       expect(state.profile === "infinity", "profile should advance to infinity");
       expect(result.lines[0].includes("LEVEL ∞"), "infinity boot message should be shown");
-      expect(state.infinityBotName === "Cheap Cheap", "cheap cheap persona should be stored");
+      expect(state.infinityBotName === "Cheep Cheep", "cheep cheep persona should be stored");
     });
 
-    test("cheap cheap chats and invites the player back to games", () => {
+    test("cheep cheep chats and invites the player back to games", () => {
       const state = createInitialState();
       state.profile = "infinity";
-      state.cheapCheapTurns = 1;
-      state.infinityBotName = "Cheap Cheap";
+      state.cheepCheepTurns = 1;
+      state.infinityBotName = "Cheep Cheep";
       state.infinityUserName = "Professor Bock Bock";
       const result = executeCommand(state, "tell me about war");
       expect(result.lines[0].includes("War"), "chat response should discuss the prompt");
@@ -185,11 +191,40 @@
       expect(result.lines[0].includes("Professor Falken"), "trap message should be shown");
     });
 
+    test("secret token uses first five characters and does not elevate", () => {
+      const state = createInitialState();
+      const result = executeCommand(state, "login powerwagon");
+      expect(state.profile === "guest", "secret token should not promote or demote");
+      expect(result.lines[0].includes("Greetings PowerDriven"), "secret token message should be returned");
+    });
+
+    test("short secret token ignores trailing words", () => {
+      const state = createInitialState();
+      const result = executeCommand(state, "login jon go GenX GrownUp");
+      expect(result.lines[0].includes("Greetings Jon of GenX Grownup"), "short token should match regardless of extra text");
+    });
+
+    test("longer short token beats shorter token prefixes", () => {
+      const state = createInitialState();
+      const result = executeCommand(state, "login monk");
+      expect(result.lines[0].includes("Greetings Monk"), "monk should not be captured by mo prefix");
+    });
+
     test("games library includes chess", () => {
       const state = createInitialState();
       state.profile = "operator";
       const result = executeCommand(state, "games");
       expect(result.lines.some((line) => line.toLowerCase().includes("chess")), "games list should include chess");
+    });
+
+    test("chess supports white kingside castling", () => {
+      const state = startGame("chess");
+      state.board[7][5] = ".";
+      state.board[7][6] = ".";
+      state.board[6][5] = ".";
+      state.board[6][6] = ".";
+      const result = handleGameCommand(state, "move e8 g8");
+      expect(result.lines[0].includes(". r k ."), "king and rook should occupy g8 and f8 after castling");
     });
 
     test("tic tac toe marks the board", () => {

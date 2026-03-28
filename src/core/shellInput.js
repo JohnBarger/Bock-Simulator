@@ -108,11 +108,7 @@ export function getTabCompletion(state, input) {
   }
 
   if (command === "login") {
-    const keywords = Object.values(NETWORKS)
-      .map((network) => network.unlocks?.keyword)
-      .filter(Boolean);
-    keywords.push("cheap cheap", "no sweats", "whiskey business", "it sparc cast", "joshua");
-    return completeToken(caretSafeInput, keywords, currentToken);
+    return null;
   }
 
   return null;

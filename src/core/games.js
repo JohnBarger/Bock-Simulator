@@ -19,7 +19,12 @@ export function startGame(gameId) {
     return { id: gameId, board: createCheckersBoard(), over: false };
   }
   if (gameId === "chess") {
-    return { id: gameId, board: createChessBoard(), over: false };
+    return {
+      id: gameId,
+      board: createChessBoard(),
+      over: false,
+      chessMeta: createInitialChessMeta(),
+    };
   }
   if (gameId === "poker") {
     const deck = createShuffledDeck();
@@ -64,7 +69,7 @@ export function getGameIntro(gameId) {
   if (gameId === "chess") {
     return [
       "CHESS :: You are white. BOCK is black.",
-      "Use `move e2 e4`. This simulation tracks core movement and captures without advanced tournament rules.",
+      "Use `move e2 e4`. This simulation tracks core movement, captures, and castling.",
       renderGridBoard(createChessBoard()),
     ];
   }
@@ -225,22 +230,24 @@ function handleChess(gameState, input) {
   if (input === "board") return { lines: [renderGridBoard(gameState.board)], complete: false, nextState: gameState, voiceLines: [] };
   if (!input.startsWith("move ")) return invalidGameInput(gameState, "Use `move e2 e4` to direct a piece.");
   const [, from, to] = input.split(/\s+/);
-  const move = applyChessMove(gameState.board, from, to, "w");
+  const move = applyChessMove(gameState.board, from, to, "w", gameState.chessMeta);
   if (!move.valid) return invalidGameInput(gameState, move.message);
 
   let board = move.board;
+  let chessMeta = move.chessMeta ?? gameState.chessMeta;
   const lines = [renderGridBoard(board), `White moves ${from.toUpperCase()} to ${to.toUpperCase()}.`];
   const voiceLines = [`White moves ${from.toUpperCase()} to ${to.toUpperCase()}.`];
-  if (!findKing(board, "b")) return { lines: [...lines, "Black king removed from the theater. BOCK concedes this simplified war game."], complete: true, nextState: { ...gameState, board, over: true }, voiceLines: [...voiceLines, "Black king removed from the theater. Bock concedes this simplified war game."] };
+  if (!findKing(board, "b")) return { lines: [...lines, "Black king removed from the theater. BOCK concedes this simplified war game."], complete: true, nextState: { ...gameState, board, chessMeta, over: true }, voiceLines: [...voiceLines, "Black king removed from the theater. Bock concedes this simplified war game."] };
 
-  const aiMove = pickChessMove(board, "b");
-  if (!aiMove) return { lines: [...lines, "BOCK has no orderly reply. The board falls silent."], complete: true, nextState: { ...gameState, board, over: true }, voiceLines: [...voiceLines, "Bock has no orderly reply. The board falls silent."] };
+  const aiMove = pickChessMove(board, "b", chessMeta);
+  if (!aiMove) return { lines: [...lines, "BOCK has no orderly reply. The board falls silent."], complete: true, nextState: { ...gameState, board, chessMeta, over: true }, voiceLines: [...voiceLines, "Bock has no orderly reply. The board falls silent."] };
 
   board = aiMove.board;
+  chessMeta = aiMove.chessMeta ?? chessMeta;
   lines.push(`BOCK moves ${aiMove.from.toUpperCase()} to ${aiMove.to.toUpperCase()}.`, renderGridBoard(board));
   voiceLines.push(`Bock moves ${aiMove.from.toUpperCase()} to ${aiMove.to.toUpperCase()}.`);
-  if (!findKing(board, "w")) return { lines: [...lines, "Your king is removed. BOCK files the result as a cold inevitability."], complete: true, nextState: { ...gameState, board, over: true }, voiceLines: [...voiceLines, "Your king is removed. Bock files the result as a cold inevitability."] };
-  return { lines, complete: false, nextState: { ...gameState, board }, voiceLines };
+  if (!findKing(board, "w")) return { lines: [...lines, "Your king is removed. BOCK files the result as a cold inevitability."], complete: true, nextState: { ...gameState, board, chessMeta, over: true }, voiceLines: [...voiceLines, "Your king is removed. Bock files the result as a cold inevitability."] };
+  return { lines, complete: false, nextState: { ...gameState, board, chessMeta }, voiceLines };
 }
 
 function handlePoker(gameState, input) {
@@ -350,7 +357,18 @@ function createChessBoard() {
   return [["R","N","B","Q","K","B","N","R"],["P","P","P","P","P","P","P","P"],[".",".",".",".",".",".",".","."],[".",".",".",".",".",".",".","."],[".",".",".",".",".",".",".","."],[".",".",".",".",".",".",".","."],["p","p","p","p","p","p","p","p"],["r","n","b","q","k","b","n","r"]];
 }
 
-function applyChessMove(board, fromCell, toCell, side) {
+function createInitialChessMeta() {
+  return {
+    whiteKingMoved: false,
+    blackKingMoved: false,
+    whiteRookAMoved: false,
+    whiteRookHMoved: false,
+    blackRookAMoved: false,
+    blackRookHMoved: false,
+  };
+}
+
+function applyChessMove(board, fromCell, toCell, side, chessMeta = createInitialChessMeta()) {
   const from = parseGridCell(fromCell, 8);
   const to = parseGridCell(toCell, 8);
   if (from === null || to === null) return { valid: false, message: "That move leaves the chessboard." };
@@ -360,16 +378,25 @@ function applyChessMove(board, fromCell, toCell, side) {
   if (piece === "." || (side === "w" ? piece !== piece.toLowerCase() : piece !== piece.toUpperCase())) return { valid: false, message: "No controlled piece stands on that square." };
   const target = board[toRow][toCol];
   if (target !== "." && sameSide(piece, target)) return { valid: false, message: "Your own line already occupies that square." };
-  if (!isLegalChessMove(board, fromRow, fromCol, toRow, toCol, piece)) return { valid: false, message: "That piece cannot move along the requested line." };
+  if (!isLegalChessMove(board, fromRow, fromCol, toRow, toCol, piece, chessMeta)) return { valid: false, message: "That piece cannot move along the requested line." };
   const boardCopy = cloneBoard(board);
-  boardCopy[toRow][toCol] = piece;
-  boardCopy[fromRow][fromCol] = ".";
-  if (piece === "p" && toRow === 0) boardCopy[toRow][toCol] = "q";
-  if (piece === "P" && toRow === 7) boardCopy[toRow][toCol] = "Q";
-  return { valid: true, board: boardCopy };
+  const nextMeta = { ...chessMeta };
+  if (isCastlingMove(fromRow, fromCol, toRow, toCol, piece)) {
+    applyCastlingMove(boardCopy, fromRow, toCol, piece);
+  } else {
+    boardCopy[toRow][toCol] = piece;
+    boardCopy[fromRow][fromCol] = ".";
+  }
+  updateChessMetaForMove(nextMeta, piece, fromRow, fromCol);
+  updateChessMetaForCapturedRook(nextMeta, target, toRow, toCol);
+  if (!isCastlingMove(fromRow, fromCol, toRow, toCol, piece)) {
+    if (piece === "p" && toRow === 0) boardCopy[toRow][toCol] = "q";
+    if (piece === "P" && toRow === 7) boardCopy[toRow][toCol] = "Q";
+  }
+  return { valid: true, board: boardCopy, chessMeta: nextMeta };
 }
 
-function pickChessMove(board, side) {
+function pickChessMove(board, side, chessMeta = createInitialChessMeta()) {
   const moves = [];
   for (let fromRow = 0; fromRow < 8; fromRow += 1) for (let fromCol = 0; fromCol < 8; fromCol += 1) {
     const piece = board[fromRow][fromCol];
@@ -377,14 +404,20 @@ function pickChessMove(board, side) {
     for (let toRow = 0; toRow < 8; toRow += 1) for (let toCol = 0; toCol < 8; toCol += 1) {
       const from = formatGridCell(encodeCell(fromRow, fromCol, 8), 8);
       const to = formatGridCell(encodeCell(toRow, toCol, 8), 8);
-      const applied = applyChessMove(board, from, to, side);
-      if (applied.valid) moves.push({ from, to, board: applied.board, score: pieceValue(board[toRow][toCol]) });
+      const applied = applyChessMove(board, from, to, side, chessMeta);
+      if (applied.valid) moves.push({
+        from,
+        to,
+        board: applied.board,
+        chessMeta: applied.chessMeta,
+        score: pieceValue(board[toRow][toCol]) + (isCastlingMove(fromRow, fromCol, toRow, toCol, piece) ? 0.25 : 0),
+      });
     }
   }
   return moves.sort((left, right) => right.score - left.score)[0] ?? null;
 }
 
-function isLegalChessMove(board, fromRow, fromCol, toRow, toCol, piece) {
+function isLegalChessMove(board, fromRow, fromCol, toRow, toCol, piece, chessMeta) {
   const rowDiff = toRow - fromRow;
   const colDiff = toCol - fromCol;
   const absRow = Math.abs(rowDiff);
@@ -405,8 +438,63 @@ function isLegalChessMove(board, fromRow, fromCol, toRow, toCol, piece) {
   if (lower === "b") return absRow === absCol && isPathClear(board, fromRow, fromCol, toRow, toCol);
   if (lower === "r") return (rowDiff === 0 || colDiff === 0) && isPathClear(board, fromRow, fromCol, toRow, toCol);
   if (lower === "q") return ((absRow === absCol) || rowDiff === 0 || colDiff === 0) && isPathClear(board, fromRow, fromCol, toRow, toCol);
-  if (lower === "k") return absRow <= 1 && absCol <= 1;
+  if (lower === "k") {
+    if (absRow <= 1 && absCol <= 1) return true;
+    return canCastle(board, fromRow, fromCol, toRow, toCol, piece, chessMeta);
+  }
   return false;
+}
+
+function isCastlingMove(fromRow, fromCol, toRow, toCol, piece) {
+  return piece.toLowerCase() === "k" && fromRow === toRow && Math.abs(toCol - fromCol) === 2;
+}
+
+function canCastle(board, fromRow, fromCol, toRow, toCol, piece, chessMeta) {
+  if (!isCastlingMove(fromRow, fromCol, toRow, toCol, piece)) return false;
+  const isWhite = piece === "k";
+  const homeRow = isWhite ? 7 : 0;
+  if (fromRow !== homeRow || fromCol !== 4) return false;
+  if (isWhite && chessMeta.whiteKingMoved) return false;
+  if (!isWhite && chessMeta.blackKingMoved) return false;
+
+  const kingside = toCol === 6;
+  const rookCol = kingside ? 7 : 0;
+  const rook = board[homeRow][rookCol];
+  const expectedRook = isWhite ? "r" : "R";
+  if (rook !== expectedRook) return false;
+  if (isWhite && kingside && chessMeta.whiteRookHMoved) return false;
+  if (isWhite && !kingside && chessMeta.whiteRookAMoved) return false;
+  if (!isWhite && kingside && chessMeta.blackRookHMoved) return false;
+  if (!isWhite && !kingside && chessMeta.blackRookAMoved) return false;
+
+  const pathCols = kingside ? [5, 6] : [1, 2, 3];
+  return pathCols.every((col) => board[homeRow][col] === ".");
+}
+
+function applyCastlingMove(board, row, toCol, piece) {
+  const kingside = toCol === 6;
+  const rookFromCol = kingside ? 7 : 0;
+  const rookToCol = kingside ? 5 : 3;
+  board[row][toCol] = piece;
+  board[row][4] = ".";
+  board[row][rookToCol] = board[row][rookFromCol];
+  board[row][rookFromCol] = ".";
+}
+
+function updateChessMetaForMove(chessMeta, piece, fromRow, fromCol) {
+  if (piece === "k") chessMeta.whiteKingMoved = true;
+  if (piece === "K") chessMeta.blackKingMoved = true;
+  if (piece === "r" && fromRow === 7 && fromCol === 0) chessMeta.whiteRookAMoved = true;
+  if (piece === "r" && fromRow === 7 && fromCol === 7) chessMeta.whiteRookHMoved = true;
+  if (piece === "R" && fromRow === 0 && fromCol === 0) chessMeta.blackRookAMoved = true;
+  if (piece === "R" && fromRow === 0 && fromCol === 7) chessMeta.blackRookHMoved = true;
+}
+
+function updateChessMetaForCapturedRook(chessMeta, capturedPiece, toRow, toCol) {
+  if (capturedPiece === "r" && toRow === 7 && toCol === 0) chessMeta.whiteRookAMoved = true;
+  if (capturedPiece === "r" && toRow === 7 && toCol === 7) chessMeta.whiteRookHMoved = true;
+  if (capturedPiece === "R" && toRow === 0 && toCol === 0) chessMeta.blackRookAMoved = true;
+  if (capturedPiece === "R" && toRow === 0 && toCol === 7) chessMeta.blackRookHMoved = true;
 }
 
 function isPathClear(board, fromRow, fromCol, toRow, toCol) {

@@ -1,4 +1,4 @@
-export const VERSION = "26.3.28.1";
+export const VERSION = "26.3.28.2";
 
 export const ACCESS_LEVELS = [
   { key: "guest", label: "GUEST", rank: 0 },
@@ -142,7 +142,7 @@ export const DIRECTORIES = {
     "OMEGA",
     "LAUNCH-SIM",
     "LEVEL-INFINITY",
-    "CHEAP-CHEAP",
+    "CHEEP-CHEEP",
   ],
 };
 

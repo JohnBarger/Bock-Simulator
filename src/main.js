@@ -27,6 +27,7 @@ const elements = {
   voicePitchValue: document.querySelector("#voice-pitch-value"),
   demoToggle: document.querySelector("#demo-toggle"),
   clock: document.querySelector("#clock-output"),
+  userCount: document.querySelector("#user-count-output"),
   profile: document.querySelector("#profile-output"),
   theater: document.querySelector("#theater-output"),
   subsystems: document.querySelector("#subsystems-output"),
@@ -239,23 +240,26 @@ function typeLine(line, tone, options = {}) {
     elements.output.appendChild(div);
 
     let index = 0;
+    let spoken = false;
     clearTimeout(typingTimer);
 
     const step = () => {
-      div.textContent = line.slice(0, index);
+      if (!spoken && options.speak !== false) {
+        voice.speak(line);
+        spoken = true;
+      }
+
+      div.textContent = line.slice(0, index + 1);
       elements.output.scrollTop = elements.output.scrollHeight;
 
-      if (index < line.length) {
-        index += 1;
-        if (state.soundEnabled && line[index - 1] !== " ") {
+      if (index < line.length - 1) {
+        if (state.soundEnabled && line[index] !== " ") {
           speaker.chirp("type");
         }
+        index += 1;
         typingTimer = window.setTimeout(step, Math.min(28, 12 + Math.random() * 18));
       } else {
         typingTimer = null;
-        if (options.speak !== false) {
-          voice.speak(line);
-        }
         resolve();
       }
     };
@@ -270,6 +274,8 @@ function renderSidebar() {
     `THEATER CLOCK :: ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`,
     `SESSION ARCHIVE :: ${state.commandHistory.length} commands`,
   ].join("\n");
+
+  elements.userCount.textContent = `CURRENT USER COUNT :: ${getCurrentUserCount(state)}`;
 
   const profile = getProfile(state);
   elements.profile.textContent = [
@@ -290,6 +296,10 @@ function renderSidebar() {
     ? state.discoveredKeywords.map((entry) => `- ${entry.toUpperCase()}`).join("\n")
     : "- NONE";
   elements.unlocks.textContent = discoveries;
+}
+
+function getCurrentUserCount(currentState) {
+  return currentState.profile === "infinity" ? 2 : 1;
 }
 
 function persistState() {

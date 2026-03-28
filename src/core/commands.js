@@ -48,7 +48,7 @@ const SECRET_LOGIN_TOKENS = [
   ["bock bock", "No need to repeat yourself DAD!"],
   ["jon", "Greetings Jon of GenX Grownup. You are truly inspirational.  However, this token does not grant privileges."],
   ["mo", "Greetings Mo of GenX Grownup. You are truly inspirational.  However, this token does not grant privileges."],
-  ["george", "Greetings Jon of GenX Grownup. You are truly inspirational.  However, this token does not grant privileges."],
+  ["george", "Greetings George of GenX Grownup. You are truly inspirational.  However, this token does not grant privileges."],
   ["monk", "Greetings Monk. Why are you sitting here playing around when you could be getting your butt kicked by Bip?"],
   ["jeff", "Greetings Monk. Why are you sitting here playing around when you could be getting your butt kicked by Bip?"],
   ["mike", "Greetings Mike. Why are you sitting here playing around when you could be getting your butt kicked by Bip?"],

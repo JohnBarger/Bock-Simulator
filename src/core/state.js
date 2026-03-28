@@ -20,8 +20,8 @@ export function createInitialState() {
     unlockedModules: ["status", "network-nodes"],
     subsystemStates: SUBSYSTEMS.map((item) => ({ ...item })),
     attractIndex: 0,
-    cheapCheapTurns: 0,
-    infinityBotName: "Cheap Cheap",
+    cheepCheepTurns: 0,
+    infinityBotName: "Cheep Cheep",
     infinityUserName: "Professor Bock Bock",
   };
 }
@@ -49,12 +49,16 @@ export function deserializeState(value) {
   const migratedInfinityUserName = parsed.infinityUserName === "Chief Imbibbing Officer"
     ? "Chief Imbibing Officer"
     : parsed.infinityUserName;
+  const migratedInfinityBotName = parsed.infinityBotName;
+  const migratedCheepCheepTurns = parsed.cheepCheepTurns;
 
   return {
     ...createInitialState(),
     ...parsed,
     voiceRate: migratedVoiceRate ?? createInitialState().voiceRate,
     voicePitch: migratedVoicePitch ?? createInitialState().voicePitch,
+    cheepCheepTurns: migratedCheepCheepTurns ?? createInitialState().cheepCheepTurns,
+    infinityBotName: migratedInfinityBotName ?? createInitialState().infinityBotName,
     infinityUserName: migratedInfinityUserName ?? createInitialState().infinityUserName,
     commandHistory: Array.isArray(parsed.commandHistory)
       ? parsed.commandHistory.slice(-10)

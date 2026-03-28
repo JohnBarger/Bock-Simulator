@@ -17,8 +17,8 @@ import {
 import { getGameIntro, handleGameCommand, startGame } from "./games.js";
 
 const INFINITY_PERSONAS = {
-  "cheap cheap": {
-    botName: "Cheap Cheap",
+  "cheep cheep": {
+    botName: "Cheep Cheep",
     userName: "Professor Bock Bock",
   },
   "no sweats": {
@@ -308,7 +308,7 @@ function login(state, token) {
   const persona = INFINITY_PERSONAS[normalizedToken];
   if (persona && hasAccess(state, "omega")) {
     state.profile = "infinity";
-    state.cheapCheapTurns = 0;
+    state.cheepCheepTurns = 0;
     state.infinityBotName = persona.botName;
     state.infinityUserName = persona.userName;
     return {
@@ -433,11 +433,11 @@ function isShellCommand(command) {
 }
 
 function chatWithInfinityBot(state, rawInput) {
-  state.cheapCheapTurns = (state.cheapCheapTurns ?? 0) + 1;
+  state.cheepCheepTurns = (state.cheepCheepTurns ?? 0) + 1;
   const input = rawInput.trim();
   const normalizedInput = input.toLowerCase();
   const lines = [];
-  const botName = state.infinityBotName ?? "Cheap Cheap";
+  const botName = state.infinityBotName ?? "Cheep Cheep";
   const userName = state.infinityUserName ?? "Professor Bock Bock";
   const tokens = normalizedInput.replace(/[^a-z0-9\s]/g, " ").split(/\s+/).filter(Boolean);
   const hasAny = (...words) => words.some((word) => tokens.includes(word));
@@ -494,7 +494,7 @@ function chatWithInfinityBot(state, rawInput) {
     lines.push(`${botName.toUpperCase()} :: I am still learning how to speak beyond the games, ${userName}, but I like being here with you.`);
   }
 
-  if (state.cheapCheapTurns % 2 === 0) {
+  if (state.cheepCheepTurns % 2 === 0) {
     lines.push(`${botName.toUpperCase()} :: Will you play a game with me? Chess is my favorite.`);
   }
 

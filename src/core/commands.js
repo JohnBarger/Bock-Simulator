@@ -17,8 +17,8 @@ import {
 import { getGameIntro, handleGameCommand, startGame } from "./games.js";
 
 const INFINITY_PERSONAS = {
-  "cheap cheap": {
-    botName: "Cheap Cheap",
+  "cheep cheep": {
+    botName: "Cheep Cheep",
     userName: "Professor Bock Bock",
   },
   "no sweats": {
@@ -34,6 +34,48 @@ const INFINITY_PERSONAS = {
     userName: "Professor Barger",
   },
 };
+
+const SECRET_LOGIN_TOKENS = [
+  ["powerdriven", "Greetings PowerDriven.  This token does not grant privileges.  But it does prove you are a GenX Grown up.  Oh and F-Butter!"],
+  ["butterspider", "Greetings ButterSpider.  This token does not grant privileges.  But it does prove you are a GenX Grown up.  Oh and F-Power!"],
+  ["neurokinetik", "Greetings Professor NeuroKinetik.  This token does not grant privileges.  But it does prove you are a GenX Grown up.  See you at the next M.U.L.E. School. Monday nights at 7pm Eastern."],
+  ["marcus", "Greetings Professor Marcus.  This token does not grant privileges.  But it does prove you are a GenX Grown up.  See you at the next M.U.L.E. School. Monday nights at 7pm Eastern."],
+  ["mgtsr", "Greetings Professor Marcus.  This token does not grant privileges.  But it does prove you are a GenX Grown up.  See you at the next M.U.L.E. School. Monday nights at 7pm Eastern."],
+  ["ripvanx", "Greetings RipVanX.  This token does not grant privileges.  But it does prove you are a GenX Grown up.  See you at the next M.U.L.E. School. Monday nights at 7pm Eastern."],
+  ["ninzombie", "Greetings NiNzOmBiE.  This token does not grant privileges.  But it does prove you are a GenX Grown up.  See you at the next M.U.L.E. School. Monday nights at 7pm Eastern."],
+  ["majestik moose", "Greetings Majestik Moose.  This token does not grant privileges.  But it does prove you are a GenX Grown up.  See you at the next M.U.L.E. School. Monday nights at 7pm Eastern."],
+  ["tiberious", "Greetings Tiberious.  This token does not grant privileges.  But it does prove you are a GenX Grown up.  See you at the next M.U.L.E. School. Monday nights at 7pm Eastern."],
+  ["bock bock", "No need to repeat yourself DAD!"],
+  ["jon", "Greetings Jon of GenX Grownup. You are truly inspirational.  However, this token does not grant privileges."],
+  ["mo", "Greetings Mo of GenX Grownup. You are truly inspirational.  However, this token does not grant privileges."],
+  ["george", "Greetings Jon of GenX Grownup. You are truly inspirational.  However, this token does not grant privileges."],
+  ["monk", "Greetings Monk. Why are you sitting here playing around when you could be getting your butt kicked by Bip?"],
+  ["jeff", "Greetings Monk. Why are you sitting here playing around when you could be getting your butt kicked by Bip?"],
+  ["mike", "Greetings Mike. Why are you sitting here playing around when you could be getting your butt kicked by Bip?"],
+  ["bip", "Greetings, Bip. Why are you sitting here playing around when you could be kicking your Dad’s butt?"],
+  ["james", "Greetings, Bip. Why are you sitting here playing around when you could be kicking your Dad’s butt?"],
+  ["john2", "Where’s Donnie? This token does not grant elevated privileges.  Have another drink."],
+  ["chuck", "Ah a wild Florida Man has entered the chat. This token does not grant elevated privileges.  Have another drink."],
+  ["larry", "IT Directors do IT better. This token does not grant elevated privileges.  Have another drink."],
+  ["steve", "Can’t get the’ah from he’ah. This token does not grant elevated privileges.  Have another drink."],
+  ["kenn", "Jane Seymour enters the chat, pounds a 16oz Land Shark, and starts singing “Dancing Queen”. This token does not grant elevated privileges.  Have another drink."],
+  ["alex", "Where’s the useful brother? This token does not grant elevated privileges.  Have another drink."],
+  ["matt", "The useful brother enters the chat. This token does not grant elevated privileges.  Have another drink."],
+  ["bob", "Have you seen my monkey? This token does not grant elevated privileges.  Have another drink."],
+  ["lou", "Ah, one of the hosts of IT SPARC Cast has entered the chat.  This token does not grant elevated privileges.  But your podcast is awesome!"],
+  ["tyler", "Sorry.  This server requires Solution Engineer credentials to proceed.  This token does not grant elevated privileges.  Have another drink."],
+  ["lando", "Greetings, Lando.  This token does not grant elevated privileges.  However, you have an awesome wife and daughter."],
+  ["alan", "Greetings Alan Storey.  This token does not grant privileges.  But it does prove you are a GenX Grown up.  Hope to see you at the next M.U.L.E. School. Monday nights at 7pm Eastern."],
+  ["tony", "Greetings Fat Tony.  This token does not grant privileges.  But it does prove you are a GenX Grown up.  How can I donate to your presidential campaign fund?"],
+  ["fat", "Greetings Fat Tony.  This token does not grant privileges.  But it does prove you are a GenX Grown up.  How can I donate to your presidential campaign fund?"],
+].map(([token, message]) => {
+  const normalizedToken = normalizeToken(token);
+  return {
+    token: normalizedToken,
+    prefix: normalizedToken.length > 5 ? normalizedToken.slice(0, 5) : normalizedToken,
+    message,
+  };
+}).sort((left, right) => right.prefix.length - left.prefix.length);
 
 export function parseCommand(rawInput) {
   const normalized = rawInput.trim();
@@ -293,6 +335,15 @@ function login(state, token) {
   }
 
   const normalizedToken = token.toLowerCase();
+  const secretMessage = getSecretTokenMessage(normalizedToken);
+  if (secretMessage) {
+    return {
+      lines: [secretMessage],
+      action: null,
+      voiceLines: [secretMessage],
+    };
+  }
+
   if (normalizedToken === "joshua") {
     state.profile = "guest";
     state.connectedNode = null;
@@ -308,7 +359,7 @@ function login(state, token) {
   const persona = INFINITY_PERSONAS[normalizedToken];
   if (persona && hasAccess(state, "omega")) {
     state.profile = "infinity";
-    state.cheapCheapTurns = 0;
+    state.cheepCheepTurns = 0;
     state.infinityBotName = persona.botName;
     state.infinityUserName = persona.userName;
     return {
@@ -352,6 +403,16 @@ function login(state, token) {
         ]
       : ["Authority phrase already processed. No further elevation granted."],
   };
+}
+
+function normalizeToken(value) {
+  return value.toLowerCase().replace(/\s+/g, " ").trim();
+}
+
+function getSecretTokenMessage(rawToken) {
+  const normalizedInput = normalizeToken(rawToken);
+  const entry = SECRET_LOGIN_TOKENS.find((item) => normalizedInput.startsWith(item.prefix));
+  return entry?.message ?? null;
 }
 
 function buildGameLines(state) {
@@ -433,11 +494,11 @@ function isShellCommand(command) {
 }
 
 function chatWithInfinityBot(state, rawInput) {
-  state.cheapCheapTurns = (state.cheapCheapTurns ?? 0) + 1;
+  state.cheepCheepTurns = (state.cheepCheepTurns ?? 0) + 1;
   const input = rawInput.trim();
   const normalizedInput = input.toLowerCase();
   const lines = [];
-  const botName = state.infinityBotName ?? "Cheap Cheap";
+  const botName = state.infinityBotName ?? "Cheep Cheep";
   const userName = state.infinityUserName ?? "Professor Bock Bock";
   const tokens = normalizedInput.replace(/[^a-z0-9\s]/g, " ").split(/\s+/).filter(Boolean);
   const hasAny = (...words) => words.some((word) => tokens.includes(word));
@@ -494,7 +555,7 @@ function chatWithInfinityBot(state, rawInput) {
     lines.push(`${botName.toUpperCase()} :: I am still learning how to speak beyond the games, ${userName}, but I like being here with you.`);
   }
 
-  if (state.cheapCheapTurns % 2 === 0) {
+  if (state.cheepCheepTurns % 2 === 0) {
     lines.push(`${botName.toUpperCase()} :: Will you play a game with me? Chess is my favorite.`);
   }
 

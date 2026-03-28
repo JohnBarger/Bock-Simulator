@@ -37,7 +37,7 @@ const INFINITY_PERSONAS = {
 
 const SECRET_LOGIN_TOKENS = [
   ["powerdriven", "Greetings PowerDriven.  This token does not grant privileges.  But it does prove you are a GenX Grown up.  Oh and F-Butter!"],
-  ["butterspider", "Greetings ButterSpider.  This token does not grant privileges.  But it does prove you are a GenX Grown up.  Oh and F-Butter!"],
+  ["butterspider", "Greetings ButterSpider.  This token does not grant privileges.  But it does prove you are a GenX Grown up.  Oh and F-Power!"],
   ["neurokinetik", "Greetings Professor NeuroKinetik.  This token does not grant privileges.  But it does prove you are a GenX Grown up.  See you at the next M.U.L.E. School. Monday nights at 7pm Eastern."],
   ["marcus", "Greetings Professor Marcus.  This token does not grant privileges.  But it does prove you are a GenX Grown up.  See you at the next M.U.L.E. School. Monday nights at 7pm Eastern."],
   ["mgtsr", "Greetings Professor Marcus.  This token does not grant privileges.  But it does prove you are a GenX Grown up.  See you at the next M.U.L.E. School. Monday nights at 7pm Eastern."],

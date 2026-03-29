@@ -191,6 +191,24 @@
       expect(result.lines[0].includes("Professor Falken"), "trap message should be shown");
     });
 
+    test("follow token opens the secret rabbit panel without changing profile", () => {
+      const state = createInitialState();
+      state.profile = "omega";
+      const result = executeCommand(state, "login Follow");
+      expect(state.profile === "omega", "follow token should not change profile");
+      expect(result.action === "show-secret-panel", "follow token should open the secret panel");
+      expect(result.payload.imageUrl.includes("white-rabbit-Cropped.jpg"), "follow token should set the white rabbit image");
+    });
+
+    test("rabbit token opens the secret rabbit panel without changing profile", () => {
+      const state = createInitialState();
+      state.profile = "strategic";
+      const result = executeCommand(state, "login rabbit");
+      expect(state.profile === "strategic", "rabbit token should not change profile");
+      expect(result.action === "show-secret-panel", "rabbit token should open the secret panel");
+      expect(result.payload.imageUrl.includes("white-rabbit-Cropped.jpg"), "rabbit token should set the white rabbit image");
+    });
+
     test("secret token uses first five characters and does not elevate", () => {
       const state = createInitialState();
       const result = executeCommand(state, "login powerwagon");

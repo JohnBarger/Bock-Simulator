@@ -1,4 +1,4 @@
-export const VERSION = "26.3.28.6";
+export const VERSION = "26.3.28.7";
 
 export const ACCESS_LEVELS = [
   { key: "guest", label: "GUEST", rank: 0 },
@@ -240,5 +240,10 @@ export const DEMO_SCRIPT = [
   "dir",
   "games",
   "play signal_hunt",
+  "trace relay-3",
+  "trace ghost-array",
+  "trace mirror-gate",
   "play chess",
+  "move e2 e4",
+  "exit",
 ];

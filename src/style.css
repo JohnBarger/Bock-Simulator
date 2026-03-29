@@ -350,6 +350,10 @@ body {
   padding: 1rem;
 }
 
+.secret-panel[hidden] {
+  display: none;
+}
+
 .secret-panel-box {
   position: relative;
   max-width: min(90vw, 46rem);

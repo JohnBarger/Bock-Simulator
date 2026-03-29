@@ -28,6 +28,7 @@ const elements = {
   voicePitch: document.querySelector("#voice-pitch"),
   voicePitchValue: document.querySelector("#voice-pitch-value"),
   screenAmber: document.querySelector("#screen-amber"),
+  screenToneLabel: document.querySelector("#screen-tone-label"),
   phosphorGlow: document.querySelector("#phosphor-glow"),
   phosphorGlowValue: document.querySelector("#phosphor-glow-value"),
   scanlineStrength: document.querySelector("#scanline-strength"),
@@ -266,15 +267,13 @@ function typeLine(line, tone, options = {}) {
     elements.output.appendChild(div);
 
     let index = 0;
-    let spoken = false;
+    if (options.speak !== false) {
+      voice.stop();
+      voice.speak(line);
+    }
     clearTimeout(typingTimer);
 
     const step = () => {
-      if (!spoken && options.speak !== false) {
-        voice.speak(line);
-        spoken = true;
-      }
-
       div.textContent = line.slice(0, index + 1);
       elements.output.scrollTop = elements.output.scrollHeight;
 
@@ -399,10 +398,11 @@ function renderAudioControls() {
 
 function renderScreenControls() {
   elements.screenAmber.checked = state.screenTone === "amber";
+  elements.screenToneLabel.textContent = state.screenTone === "amber" ? "GREEN SCREEN" : "AMBER SCREEN";
   elements.phosphorGlow.value = String(state.phosphorGlow);
-  elements.phosphorGlowValue.value = state.phosphorGlow.toFixed(2);
+  elements.phosphorGlowValue.textContent = state.phosphorGlow.toFixed(2);
   elements.scanlineStrength.value = String(state.scanlineStrength);
-  elements.scanlineStrengthValue.value = state.scanlineStrength.toFixed(2);
+  elements.scanlineStrengthValue.textContent = state.scanlineStrength.toFixed(2);
   applyScreenSettings();
 }
 
@@ -410,6 +410,7 @@ function applyScreenSettings() {
   elements.app.dataset.screenTone = state.screenTone;
   elements.app.style.setProperty("--phosphor-glow-intensity", String(state.phosphorGlow));
   elements.app.style.setProperty("--scanline-opacity", String(state.scanlineStrength));
+  elements.app.style.setProperty("--scanline-size", `${Math.max(2, 8 - state.scanlineStrength * 8).toFixed(2)}px`);
 }
 
 function createAudioBus() {

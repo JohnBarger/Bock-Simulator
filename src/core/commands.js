@@ -69,6 +69,13 @@ const SECRET_LOGIN_TOKENS = [
   ["tony", "Greetings Fat Tony.  This token does not grant privileges.  But it does prove you are a GenX Grownup.  How can I donate to your presidential campaign fund?"],
   ["fat", "Greetings Fat Tony.  This token does not grant privileges.  But it does prove you are a GenX Grownup.  How can I donate to your presidential campaign fund?"],
   ["papa", "Greetings Pa Pa.  This token does not grant privileges.  But it does come with a message.  Blake and Zoey love you!"],
+  ["grampa", "Greetings Pa Pa.  This token does not grant privileges.  But it does come with a message.  Blake and Zoey love you!"],
+  ["grandpa", "Greetings Pa Pa.  This token does not grant privileges.  But it does come with a message.  Blake and Zoey love you!"],
+  ["grandfather", "Greetings Pa Pa.  This token does not grant privileges.  But it does come with a message.  Blake and Zoey love you!"],
+  ["firegod", "Greetings FireGod.  This token does not grant privileges.  But it does come with a message.  Blake and Zoey love you!"],
+  ["nerd", "I know you are.  What am I?"],
+  ["dork", "I know you are.  What am I?"],
+  ["geek", "Ahhhhh.  It’s like looking in a mirror."],
   ["jeremy", "Greetings FireGod.  This token does not grant privileges.  But it does come with a message.  Blake and Zoey love you!"],
   ["retrojack", "Greetings RetroJack.  This token does not grant privileges.  But it does prove you are a GenX Grownup.  See you at the next M.U.L.E. School. Monday nights at 7pm Eastern."],
 ].map(([token, message]) => {

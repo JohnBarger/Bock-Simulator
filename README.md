@@ -1,8 +1,8 @@
-# BOCK
+# BOCK - Battle Operations Command Kernel
 
 BOCK is a local single-player retro military computer simulator presented as a fictional 1980s command terminal. Everything in the app is self-contained: the systems, networks, locations, vulnerabilities, command flow, and conflict simulations are invented for dramatic gameplay only.
 
-Current version: `26.3.28.6`
+Current version: `26.3.28.8`
 
 ## Features
 

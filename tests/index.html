@@ -25,7 +25,7 @@
     import { executeCommand, parseCommand } from "../src/core/commands.js";
     import { handleGameCommand, startGame } from "../src/core/games.js";
     import { getTabCompletion, navigateHistory, pushHistory } from "../src/core/shellInput.js";
-    import { createInitialState } from "../src/core/state.js";
+    import { createInitialState, deserializeState } from "../src/core/state.js";
 
     const results = document.querySelector("#results");
     let failures = 0;
@@ -208,6 +208,33 @@
       const state = createInitialState();
       const result = executeCommand(state, "login monk");
       expect(result.lines[0].includes("Greetings Monk"), "monk should not be captured by mo prefix");
+    });
+
+    test("bip and james tokens return the social blocking message", () => {
+      const bipState = createInitialState();
+      const bipResult = executeCommand(bipState, "login bip");
+      expect(bipResult.lines[0].includes("block Bock on all your socials"), "bip message should be updated");
+
+      const jamesState = createInitialState();
+      const jamesResult = executeCommand(jamesState, "login james");
+      expect(jamesResult.lines[0].includes("block Bock on all your socials"), "james message should be updated");
+    });
+
+    test("new GXG and AtariTom2X00 tokens return messages without elevating", () => {
+      const gxgState = createInitialState();
+      const gxgResult = executeCommand(gxgState, "login GXG");
+      expect(gxgState.profile === "guest", "GXG should not elevate profile");
+      expect(gxgResult.lines[0].includes("GenX Grownup Discord server"), "GXG message should be returned");
+
+      const atariState = createInitialState();
+      const atariResult = executeCommand(atariState, "login AtariTom2X00");
+      expect(atariState.profile === "guest", "AtariTom2X00 should not elevate profile");
+      expect(atariResult.lines[0].includes("How about a nice game of chess?"), "AtariTom2X00 message should be returned");
+    });
+
+    test("phosphor glow migration clamps to the new max", () => {
+      const loaded = deserializeState(JSON.stringify({ phosphorGlow: 25 }));
+      expect(loaded.phosphorGlow === 10, "phosphor glow should clamp to 10");
     });
 
     test("games library includes chess", () => {

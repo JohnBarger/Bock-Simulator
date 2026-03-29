@@ -9,6 +9,8 @@ import {
 } from "./core/state.js";
 
 const state = restoreState();
+const MIN_PHOSPHOR_GLOW = 0.5;
+const MAX_PHOSPHOR_GLOW = 10;
 
 const elements = {
   output: document.querySelector("#terminal-output"),
@@ -113,7 +115,7 @@ function bindEvents() {
   });
 
   elements.phosphorGlow.addEventListener("input", () => {
-    state.phosphorGlow = Number(elements.phosphorGlow.value);
+    state.phosphorGlow = clampPhosphorGlow(Number(elements.phosphorGlow.value));
     renderScreenControls();
     persistState();
   });
@@ -397,6 +399,7 @@ function renderAudioControls() {
 }
 
 function renderScreenControls() {
+  state.phosphorGlow = clampPhosphorGlow(state.phosphorGlow);
   elements.screenAmber.checked = state.screenTone === "amber";
   elements.screenToneLabel.textContent = state.screenTone === "amber" ? "GREEN SCREEN" : "AMBER SCREEN";
   elements.phosphorGlow.value = String(state.phosphorGlow);
@@ -404,6 +407,13 @@ function renderScreenControls() {
   elements.scanlineStrength.value = String(state.scanlineStrength);
   elements.scanlineStrengthValue.textContent = state.scanlineStrength.toFixed(2);
   applyScreenSettings();
+}
+
+function clampPhosphorGlow(value) {
+  if (!Number.isFinite(value)) {
+    return 1;
+  }
+  return Math.min(MAX_PHOSPHOR_GLOW, Math.max(MIN_PHOSPHOR_GLOW, value));
 }
 
 function applyScreenSettings() {

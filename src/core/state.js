@@ -55,7 +55,9 @@ export function deserializeState(value) {
   const migratedInfinityBotName = parsed.infinityBotName;
   const migratedCheepCheepTurns = parsed.cheepCheepTurns;
   const migratedScreenTone = parsed.screenTone === "amber" ? "amber" : "green";
-  const migratedPhosphorGlow = Number.isFinite(parsed.phosphorGlow) ? parsed.phosphorGlow : createInitialState().phosphorGlow;
+  const migratedPhosphorGlow = Number.isFinite(parsed.phosphorGlow)
+    ? Math.min(10, Math.max(0.5, parsed.phosphorGlow))
+    : createInitialState().phosphorGlow;
   const migratedScanlineStrength = Number.isFinite(parsed.scanlineStrength) ? parsed.scanlineStrength : createInitialState().scanlineStrength;
 
   return {

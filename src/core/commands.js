@@ -359,7 +359,9 @@ function login(state, token) {
     };
   }
 
-  if (SECRET_PANEL_TOKENS.has(normalizeToken(normalizedToken))) {
+  const normalizedPhrase = normalizeToken(normalizedToken);
+  const panelTokenMatch = normalizedPhrase.split(/\s+/).some((word) => SECRET_PANEL_TOKENS.has(word));
+  if (panelTokenMatch) {
     return {
       lines: ["Panel signal accepted."],
       action: "show-secret-panel",

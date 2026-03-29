@@ -89,8 +89,23 @@ const SECRET_LOGIN_TOKENS = [
   };
 }).sort((left, right) => right.prefix.length - left.prefix.length);
 
-const SECRET_PANEL_TOKENS = new Set(["follow", "rabbit", "blade", "day walker", "mother", "fucker", "skate"]);
-const SECRET_PANEL_IMAGE_URL = "https://c.tenor.com/o_soNKrm080AAAAC/some-motherfuckers-are-alwaystrying-to-ice-skate-uphill.-wesley-snipes.gif";
+const SECRET_PANEL_TOKEN_IMAGE_GROUPS = [
+  {
+    imageUrl: "https://c.tenor.com/o_soNKrm080AAAAC/some-motherfuckers-are-alwaystrying-to-ice-skate-uphill.-wesley-snipes.gif",
+    tokens: ["blade", "day walker", "mother", "fucker", "skate"],
+  },
+  {
+    imageUrl: "https://static1.srcdn.com/wordpress/wp-content/uploads/2021/12/white-rabbit-Cropped.jpg",
+    tokens: ["follow", "rabbit", "white"],
+  },
+];
+
+const SECRET_PANEL_TOKEN_IMAGE_MAP = SECRET_PANEL_TOKEN_IMAGE_GROUPS.reduce((map, group) => {
+  group.tokens.forEach((token) => {
+    map.set(normalizeToken(token), group.imageUrl);
+  });
+  return map;
+}, new Map());
 
 export function parseCommand(rawInput) {
   const normalized = rawInput.trim();
@@ -360,13 +375,13 @@ function login(state, token) {
   }
 
   const normalizedPhrase = normalizeToken(normalizedToken);
-  const panelTokenMatch = SECRET_PANEL_TOKENS.has(normalizedPhrase);
-  if (panelTokenMatch) {
+  const panelImageUrl = SECRET_PANEL_TOKEN_IMAGE_MAP.get(normalizedPhrase);
+  if (panelImageUrl) {
     return {
       lines: ["Panel signal accepted."],
       action: "show-secret-panel",
       payload: {
-        imageUrl: SECRET_PANEL_IMAGE_URL,
+        imageUrl: panelImageUrl,
       },
       voiceLines: [],
     };

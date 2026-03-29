@@ -89,8 +89,8 @@ const SECRET_LOGIN_TOKENS = [
   };
 }).sort((left, right) => right.prefix.length - left.prefix.length);
 
-const SECRET_PANEL_TOKENS = new Set(["follow", "rabbit"]);
-const SECRET_PANEL_IMAGE_URL = "https://static1.srcdn.com/wordpress/wp-content/uploads/2021/12/white-rabbit-Cropped.jpg";
+const SECRET_PANEL_TOKENS = new Set(["follow", "rabbit", "blade", "day walker", "mother", "fucker", "skate"]);
+const SECRET_PANEL_IMAGE_URL = "https://c.tenor.com/o_soNKrm080AAAAC/some-motherfuckers-are-alwaystrying-to-ice-skate-uphill.-wesley-snipes.gif";
 
 export function parseCommand(rawInput) {
   const normalized = rawInput.trim();
@@ -360,7 +360,7 @@ function login(state, token) {
   }
 
   const normalizedPhrase = normalizeToken(normalizedToken);
-  const panelTokenMatch = normalizedPhrase.split(/\s+/).some((word) => SECRET_PANEL_TOKENS.has(word));
+  const panelTokenMatch = SECRET_PANEL_TOKENS.has(normalizedPhrase);
   if (panelTokenMatch) {
     return {
       lines: ["Panel signal accepted."],

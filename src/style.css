@@ -9,6 +9,8 @@
   --alert: #ff8779;
   --shadow: rgba(0, 0, 0, 0.55);
   --font-terminal: "Courier New", "Lucida Console", monospace;
+  --phosphor-glow-intensity: 1;
+  --scanline-opacity: 0.34;
 }
 
 * {
@@ -54,7 +56,7 @@ body {
     linear-gradient(90deg, rgba(0, 0, 0, 0.04), rgba(78, 177, 99, 0.03), rgba(0, 0, 0, 0.05));
   background-size: 100% 5px, 3px 100%;
   mix-blend-mode: screen;
-  opacity: 0.34;
+  opacity: var(--scanline-opacity);
 }
 
 .screen-noise {
@@ -125,20 +127,20 @@ body {
   box-shadow: 0 0 14px rgba(136, 255, 158, 0.16);
 }
 
-.voice-menu {
+.settings-menu {
   position: relative;
   z-index: 7;
 }
 
-.voice-menu summary {
+.settings-menu summary {
   list-style: none;
 }
 
-.voice-menu summary::-webkit-details-marker {
+.settings-menu summary::-webkit-details-marker {
   display: none;
 }
 
-.voice-menu-panel {
+.settings-menu-panel {
   position: absolute;
   right: 0;
   top: 100%;
@@ -151,6 +153,18 @@ body {
   display: grid;
   gap: 0.8rem;
   box-shadow: 0 0 18px rgba(0, 0, 0, 0.34);
+}
+
+.voice-checkbox {
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  column-gap: 0.5rem;
+}
+
+.voice-checkbox input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--glow);
 }
 
 .voice-control {
@@ -273,7 +287,7 @@ body {
 .terminal-line {
   white-space: pre-wrap;
   margin-bottom: 0.32rem;
-  text-shadow: 0 0 12px rgba(82, 202, 103, 0.27);
+  text-shadow: 0 0 calc(12px * var(--phosphor-glow-intensity)) rgba(82, 202, 103, 0.27);
 }
 
 .terminal-line.system {
@@ -318,6 +332,16 @@ body {
   padding: 0 1.25rem 1rem;
   color: rgba(136, 255, 158, 0.66);
   font-size: 0.82rem;
+}
+
+.crt-shell[data-screen-tone="amber"] {
+  --screen-bg: #1a0f02;
+  --panel-bg: rgba(29, 17, 4, 0.82);
+  --line: rgba(255, 169, 73, 0.18);
+  --glow: #ffb76a;
+  --bright: #ffdcb1;
+  --dim: #d98f42;
+  --warn: #ffe680;
 }
 
 @media (max-width: 1180px) {

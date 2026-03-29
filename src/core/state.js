@@ -10,9 +10,12 @@ export function createInitialState() {
     discoveredNodes: [],
     bootComplete: false,
     soundEnabled: true,
-    voiceEnabled: false,
+    voiceEnabled: true,
     voiceRate: 1.15,
     voicePitch: 0.70,
+    screenTone: "green",
+    phosphorGlow: 1,
+    scanlineStrength: 0.34,
     demoMode: false,
     currentGame: null,
     gameState: null,
@@ -51,12 +54,18 @@ export function deserializeState(value) {
     : parsed.infinityUserName;
   const migratedInfinityBotName = parsed.infinityBotName;
   const migratedCheepCheepTurns = parsed.cheepCheepTurns;
+  const migratedScreenTone = parsed.screenTone === "amber" ? "amber" : "green";
+  const migratedPhosphorGlow = Number.isFinite(parsed.phosphorGlow) ? parsed.phosphorGlow : createInitialState().phosphorGlow;
+  const migratedScanlineStrength = Number.isFinite(parsed.scanlineStrength) ? parsed.scanlineStrength : createInitialState().scanlineStrength;
 
   return {
     ...createInitialState(),
     ...parsed,
     voiceRate: migratedVoiceRate ?? createInitialState().voiceRate,
     voicePitch: migratedVoicePitch ?? createInitialState().voicePitch,
+    screenTone: migratedScreenTone,
+    phosphorGlow: migratedPhosphorGlow,
+    scanlineStrength: migratedScanlineStrength,
     cheepCheepTurns: migratedCheepCheepTurns ?? createInitialState().cheepCheepTurns,
     infinityBotName: migratedInfinityBotName ?? createInitialState().infinityBotName,
     infinityUserName: migratedInfinityUserName ?? createInitialState().infinityUserName,

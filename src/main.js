@@ -18,13 +18,20 @@ const elements = {
   version: document.querySelector("#version-output"),
   bootCurtain: document.querySelector("#boot-curtain"),
   bootLog: document.querySelector("#boot-log"),
-  soundToggle: document.querySelector("#sound-toggle"),
-  voiceToggle: document.querySelector("#voice-toggle"),
-  voiceMenu: document.querySelector("#voice-menu"),
+  app: document.querySelector("#app"),
+  audioMenu: document.querySelector("#audio-menu"),
+  screenMenu: document.querySelector("#screen-menu"),
+  soundEnabled: document.querySelector("#sound-enabled"),
+  voiceEnabled: document.querySelector("#voice-enabled"),
   voiceRate: document.querySelector("#voice-rate"),
   voiceRateValue: document.querySelector("#voice-rate-value"),
   voicePitch: document.querySelector("#voice-pitch"),
   voicePitchValue: document.querySelector("#voice-pitch-value"),
+  screenAmber: document.querySelector("#screen-amber"),
+  phosphorGlow: document.querySelector("#phosphor-glow"),
+  phosphorGlowValue: document.querySelector("#phosphor-glow-value"),
+  scanlineStrength: document.querySelector("#scanline-strength"),
+  scanlineStrengthValue: document.querySelector("#scanline-strength-value"),
   demoToggle: document.querySelector("#demo-toggle"),
   clock: document.querySelector("#clock-output"),
   userCount: document.querySelector("#user-count-output"),
@@ -46,11 +53,11 @@ initialize();
 function initialize() {
   renderSidebar();
   renderDemoButton();
-  renderSoundButton();
-  renderVoiceButton();
-  renderVoiceControls();
+  renderAudioControls();
+  renderScreenControls();
   elements.version.textContent = `VER ${VERSION}`;
   elements.prompt.textContent = getPrompt(state);
+  applyScreenSettings();
   bindEvents();
   runBootSequence().then(() => {
     state.bootComplete = true;
@@ -67,19 +74,16 @@ function initialize() {
 function bindEvents() {
   elements.form.addEventListener("submit", handleSubmit);
   elements.input.addEventListener("keydown", handleInputKeydown);
-  elements.soundToggle.addEventListener("click", () => {
-    state.soundEnabled = !state.soundEnabled;
-    elements.soundToggle.textContent = state.soundEnabled ? "SOUND ON" : "SOUND OFF";
-    elements.soundToggle.setAttribute("aria-pressed", String(state.soundEnabled));
+  elements.soundEnabled.addEventListener("change", () => {
+    state.soundEnabled = elements.soundEnabled.checked;
     if (state.soundEnabled) {
       speaker.chirp("toggle");
     }
     persistState();
   });
 
-  elements.voiceToggle.addEventListener("click", () => {
-    state.voiceEnabled = !state.voiceEnabled;
-    renderVoiceButton();
+  elements.voiceEnabled.addEventListener("change", () => {
+    state.voiceEnabled = elements.voiceEnabled.checked;
     if (state.voiceEnabled) {
       voice.prime();
       voice.speak("Battle Operations Command Kernel voice channel engaged.");
@@ -91,13 +95,31 @@ function bindEvents() {
 
   elements.voiceRate.addEventListener("input", () => {
     state.voiceRate = Number(elements.voiceRate.value);
-    renderVoiceControls();
+    renderAudioControls();
     persistState();
   });
 
   elements.voicePitch.addEventListener("input", () => {
     state.voicePitch = Number(elements.voicePitch.value);
-    renderVoiceControls();
+    renderAudioControls();
+    persistState();
+  });
+
+  elements.screenAmber.addEventListener("change", () => {
+    state.screenTone = elements.screenAmber.checked ? "amber" : "green";
+    renderScreenControls();
+    persistState();
+  });
+
+  elements.phosphorGlow.addEventListener("input", () => {
+    state.phosphorGlow = Number(elements.phosphorGlow.value);
+    renderScreenControls();
+    persistState();
+  });
+
+  elements.scanlineStrength.addEventListener("input", () => {
+    state.scanlineStrength = Number(elements.scanlineStrength.value);
+    renderScreenControls();
     persistState();
   });
 
@@ -115,22 +137,28 @@ function bindEvents() {
   });
 
   window.addEventListener("pointerdown", (event) => {
-    if (!elements.voiceMenu.open) {
+    if (!elements.audioMenu.open && !elements.screenMenu.open) {
       return;
     }
 
-    if (!elements.voiceMenu.contains(event.target)) {
-      elements.voiceMenu.open = false;
+    if (!elements.audioMenu.contains(event.target)) {
+      elements.audioMenu.open = false;
+    }
+    if (!elements.screenMenu.contains(event.target)) {
+      elements.screenMenu.open = false;
     }
   });
 
   window.addEventListener("focusin", (event) => {
-    if (!elements.voiceMenu.open) {
+    if (!elements.audioMenu.open && !elements.screenMenu.open) {
       return;
     }
 
-    if (!elements.voiceMenu.contains(event.target)) {
-      elements.voiceMenu.open = false;
+    if (!elements.audioMenu.contains(event.target)) {
+      elements.audioMenu.open = false;
+    }
+    if (!elements.screenMenu.contains(event.target)) {
+      elements.screenMenu.open = false;
     }
   });
 
@@ -148,10 +176,9 @@ function bindEvents() {
       Object.assign(state, loaded);
       renderSidebar();
       elements.prompt.textContent = getPrompt(state);
-      renderSoundButton();
       renderDemoButton();
-      renderVoiceButton();
-      renderVoiceControls();
+      renderAudioControls();
+      renderScreenControls();
       writeLines(["External archive update detected. Local shell refreshed."], "warn");
     }
   });
@@ -206,10 +233,9 @@ async function handleSubmit(event) {
 
   elements.prompt.textContent = getPrompt(state);
   renderSidebar();
-  renderSoundButton();
   renderDemoButton();
-  renderVoiceButton();
-  renderVoiceControls();
+  renderAudioControls();
+  renderScreenControls();
   persistState();
   scheduleDemoMode();
 }
@@ -344,6 +370,12 @@ async function runDemoScript() {
     if (!state.demoMode) {
       break;
     }
+    if (state.currentGame && !isValidGameDemoStep(state.currentGame, step)) {
+      elements.input.value = "exit";
+      await wait(450);
+      await handleSubmit(new Event("submit"));
+      await wait(550);
+    }
     elements.input.value = step;
     await wait(450);
     await handleSubmit(new Event("submit"));
@@ -356,21 +388,28 @@ function renderDemoButton() {
   elements.demoToggle.textContent = state.demoMode ? "DEMO ACTIVE" : "DEMO MODE";
 }
 
-function renderSoundButton() {
-  elements.soundToggle.textContent = state.soundEnabled ? "SOUND ON" : "SOUND OFF";
-  elements.soundToggle.setAttribute("aria-pressed", String(state.soundEnabled));
-}
-
-function renderVoiceButton() {
-  elements.voiceToggle.textContent = state.voiceEnabled ? "VOICE ON" : "VOICE OFF";
-  elements.voiceToggle.setAttribute("aria-pressed", String(state.voiceEnabled));
-}
-
-function renderVoiceControls() {
+function renderAudioControls() {
+  elements.soundEnabled.checked = state.soundEnabled;
+  elements.voiceEnabled.checked = state.voiceEnabled;
   elements.voiceRate.value = String(state.voiceRate);
   elements.voiceRateValue.value = `${state.voiceRate.toFixed(2)}x`;
   elements.voicePitch.value = String(state.voicePitch);
   elements.voicePitchValue.value = state.voicePitch.toFixed(2);
+}
+
+function renderScreenControls() {
+  elements.screenAmber.checked = state.screenTone === "amber";
+  elements.phosphorGlow.value = String(state.phosphorGlow);
+  elements.phosphorGlowValue.value = state.phosphorGlow.toFixed(2);
+  elements.scanlineStrength.value = String(state.scanlineStrength);
+  elements.scanlineStrengthValue.value = state.scanlineStrength.toFixed(2);
+  applyScreenSettings();
+}
+
+function applyScreenSettings() {
+  elements.app.dataset.screenTone = state.screenTone;
+  elements.app.style.setProperty("--phosphor-glow-intensity", String(state.phosphorGlow));
+  elements.app.style.setProperty("--scanline-opacity", String(state.scanlineStrength));
 }
 
 function createAudioBus() {
@@ -535,4 +574,23 @@ function handleInputKeydown(event) {
 function setCursorToEnd(input) {
   const position = input.value.length;
   input.setSelectionRange(position, position);
+}
+
+function isValidGameDemoStep(gameId, step) {
+  const normalizedStep = step.trim().toLowerCase();
+  if (normalizedStep === "exit" || normalizedStep === "quit" || normalizedStep === "board") {
+    return true;
+  }
+
+  const validPrefixes = {
+    red_dawn: ["deploy "],
+    signal_hunt: ["trace "],
+    world_theater: ["posture ", "advance"],
+    tic_tac_toe: ["mark "],
+    checkers: ["move "],
+    chess: ["move "],
+    poker: ["hold ", "draw", "deal", "hand"],
+  };
+
+  return (validPrefixes[gameId] ?? []).some((prefix) => normalizedStep.startsWith(prefix));
 }

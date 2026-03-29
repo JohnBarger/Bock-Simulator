@@ -36,15 +36,15 @@ const INFINITY_PERSONAS = {
 };
 
 const SECRET_LOGIN_TOKENS = [
-  ["powerdriven", "Greetings PowerDriven.  This token does not grant privileges.  But it does prove you are a GenX Grown up.  Oh and F-Butter!"],
-  ["butterspider", "Greetings ButterSpider.  This token does not grant privileges.  But it does prove you are a GenX Grown up.  Oh and F-Power!"],
-  ["neurokinetik", "Greetings Professor NeuroKinetik.  This token does not grant privileges.  But it does prove you are a GenX Grown up.  See you at the next M.U.L.E. School. Monday nights at 7pm Eastern."],
-  ["marcus", "Greetings Professor Marcus.  This token does not grant privileges.  But it does prove you are a GenX Grown up.  See you at the next M.U.L.E. School. Monday nights at 7pm Eastern."],
-  ["mgtsr", "Greetings Professor Marcus.  This token does not grant privileges.  But it does prove you are a GenX Grown up.  See you at the next M.U.L.E. School. Monday nights at 7pm Eastern."],
-  ["ripvanx", "Greetings RipVanX.  This token does not grant privileges.  But it does prove you are a GenX Grown up.  See you at the next M.U.L.E. School. Monday nights at 7pm Eastern."],
-  ["ninzombie", "Greetings NiNzOmBiE.  This token does not grant privileges.  But it does prove you are a GenX Grown up.  See you at the next M.U.L.E. School. Monday nights at 7pm Eastern."],
-  ["majestik moose", "Greetings Majestik Moose.  This token does not grant privileges.  But it does prove you are a GenX Grown up.  See you at the next M.U.L.E. School. Monday nights at 7pm Eastern."],
-  ["tiberious", "Greetings Tiberious.  This token does not grant privileges.  But it does prove you are a GenX Grown up.  See you at the next M.U.L.E. School. Monday nights at 7pm Eastern."],
+  ["powerdriven", "Greetings PowerDriven.  This token does not grant privileges.  But it does prove you are a GenX Grownup.  Oh and F-Butter!"],
+  ["butterspider", "Greetings ButterSpider.  This token does not grant privileges.  But it does prove you are a GenX Grownup.  Oh and F-Power!"],
+  ["neurokinetik", "Greetings Professor NeuroKinetik.  This token does not grant privileges.  But it does prove you are a GenX Grownup.  See you at the next M.U.L.E. School. Monday nights at 7pm Eastern."],
+  ["marcus", "Greetings Professor Marcus.  This token does not grant privileges.  But it does prove you are a GenX Grownup.  See you at the next M.U.L.E. School. Monday nights at 7pm Eastern."],
+  ["mgtsr", "Greetings Professor Marcus.  This token does not grant privileges.  But it does prove you are a GenX Grownup.  See you at the next M.U.L.E. School. Monday nights at 7pm Eastern."],
+  ["ripvanx", "Greetings RipVanX.  This token does not grant privileges.  But it does prove you are a GenX Grownup.  See you at the next M.U.L.E. School. Monday nights at 7pm Eastern."],
+  ["ninzombie", "Greetings NiNzOmBiE.  This token does not grant privileges.  But it does prove you are a GenX Grownup.  See you at the next M.U.L.E. School. Monday nights at 7pm Eastern."],
+  ["majestik moose", "Greetings Majestik Moose.  This token does not grant privileges.  But it does prove you are a GenX Grownup.  See you at the next M.U.L.E. School. Monday nights at 7pm Eastern."],
+  ["tiberious", "Greetings Tiberious.  This token does not grant privileges.  But it does prove you are a GenX Grownup.  See you at the next M.U.L.E. School. Monday nights at 7pm Eastern."],
   ["bock bock", "No need to repeat yourself DAD!"],
   ["jon", "Greetings Jon of GenX Grownup. You are truly inspirational.  However, this token does not grant privileges."],
   ["mo", "Greetings Mo of GenX Grownup. You are truly inspirational.  However, this token does not grant privileges."],
@@ -65,9 +65,12 @@ const SECRET_LOGIN_TOKENS = [
   ["lou", "Ah, one of the hosts of IT SPARC Cast has entered the chat.  This token does not grant elevated privileges.  But your podcast is awesome!"],
   ["tyler", "Sorry.  This server requires Solution Engineer credentials to proceed.  This token does not grant elevated privileges.  Have another drink."],
   ["lando", "Greetings, Lando.  This token does not grant elevated privileges.  However, you have an awesome wife and daughter."],
-  ["alan", "Greetings Alan Storey.  This token does not grant privileges.  But it does prove you are a GenX Grown up.  Hope to see you at the next M.U.L.E. School. Monday nights at 7pm Eastern."],
-  ["tony", "Greetings Fat Tony.  This token does not grant privileges.  But it does prove you are a GenX Grown up.  How can I donate to your presidential campaign fund?"],
-  ["fat", "Greetings Fat Tony.  This token does not grant privileges.  But it does prove you are a GenX Grown up.  How can I donate to your presidential campaign fund?"],
+  ["alan", "Greetings Alan Storey.  This token does not grant privileges.  But it does prove you are a GenX Grownup.  Hope to see you at the next M.U.L.E. School. Monday nights at 7pm Eastern."],
+  ["tony", "Greetings Fat Tony.  This token does not grant privileges.  But it does prove you are a GenX Grownup.  How can I donate to your presidential campaign fund?"],
+  ["fat", "Greetings Fat Tony.  This token does not grant privileges.  But it does prove you are a GenX Grownup.  How can I donate to your presidential campaign fund?"],
+  ["papa", "Greetings Pa Pa.  This token does not grant privileges.  But it does come with a message.  Blake and Zoey love you!"],
+  ["jeremy", "Greetings FireGod.  This token does not grant privileges.  But it does come with a message.  Blake and Zoey love you!"],
+  ["retrojack", "Greetings RetroJack.  This token does not grant privileges.  But it does prove you are a GenX Grownup.  See you at the next M.U.L.E. School. Monday nights at 7pm Eastern."],
 ].map(([token, message]) => {
   const normalizedToken = normalizeToken(token);
   return {

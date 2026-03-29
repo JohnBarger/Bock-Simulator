@@ -14,14 +14,20 @@
       <div class="brand">
         <span class="brand-mark">BOCK</span>
         <span class="brand-sub">Battle Operations Command Kernel</span>
-        <span id="version-output" class="brand-version">VER 26.3.28.6</span>
+        <span id="version-output" class="brand-version">VER 26.3.28.7</span>
       </div>
       <div class="topbar-actions">
-        <button id="sound-toggle" class="panel-button" type="button" aria-pressed="true">SOUND ON</button>
-        <button id="voice-toggle" class="panel-button" type="button" aria-pressed="false">VOICE OFF</button>
-        <details id="voice-menu" class="voice-menu">
-          <summary class="panel-button">VOICE MENU</summary>
-          <div class="voice-menu-panel">
+        <details id="audio-menu" class="settings-menu">
+          <summary class="panel-button">AUDIO MENU</summary>
+          <div class="settings-menu-panel">
+            <label class="voice-control voice-checkbox" for="voice-enabled">
+              <input id="voice-enabled" type="checkbox" checked>
+              <span>TEXT TO VOICE</span>
+            </label>
+            <label class="voice-control voice-checkbox" for="sound-enabled">
+              <input id="sound-enabled" type="checkbox" checked>
+              <span>RETRO SOUND</span>
+            </label>
             <label class="voice-control" for="voice-rate">
               <span>SPEED</span>
               <input id="voice-rate" type="range" min="0.7" max="2" step="0.05" value="1.15">
@@ -31,6 +37,25 @@
               <span>PITCH</span>
               <input id="voice-pitch" type="range" min="0.3" max="1.2" step="0.05" value="0.70">
               <output id="voice-pitch-value" for="voice-pitch">0.70</output>
+            </label>
+          </div>
+        </details>
+        <details id="screen-menu" class="settings-menu">
+          <summary class="panel-button">SCREEN</summary>
+          <div class="settings-menu-panel">
+            <label class="voice-control voice-checkbox" for="screen-amber">
+              <input id="screen-amber" type="checkbox">
+              <span>AMBER SCREEN</span>
+            </label>
+            <label class="voice-control" for="phosphor-glow">
+              <span>PHOSPHOR GLOW</span>
+              <input id="phosphor-glow" type="range" min="0.5" max="1.8" step="0.05" value="1">
+              <output id="phosphor-glow-value" for="phosphor-glow">1.00</output>
+            </label>
+            <label class="voice-control" for="scanline-strength">
+              <span>SCAN LINES</span>
+              <input id="scanline-strength" type="range" min="0.05" max="0.7" step="0.01" value="0.34">
+              <output id="scanline-strength-value" for="scanline-strength">0.34</output>
             </label>
           </div>
         </details>

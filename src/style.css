@@ -381,6 +381,7 @@ body {
   max-width: 100%;
   height: auto;
   border: 1px solid rgba(136, 255, 158, 0.18);
+  filter: sepia(0.3) hue-rotate(52deg) saturate(1.35) brightness(0.92);
 }
 
 .crt-shell[data-screen-tone="amber"] {

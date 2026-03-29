@@ -340,6 +340,45 @@ body {
   font-size: 0.82rem;
 }
 
+.secret-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 1rem;
+}
+
+.secret-panel-box {
+  position: relative;
+  max-width: min(90vw, 46rem);
+  border: 1px solid rgba(136, 255, 158, 0.32);
+  background: rgba(3, 12, 5, 0.95);
+  box-shadow: 0 0 24px rgba(0, 0, 0, 0.45);
+  padding: 2.2rem 1rem 1rem;
+}
+
+.secret-panel-close {
+  position: absolute;
+  right: 0.6rem;
+  top: 0.5rem;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid color-mix(in srgb, var(--glow) 32%, transparent);
+  background: rgba(7, 28, 12, 0.82);
+  color: var(--bright);
+  font: inherit;
+  cursor: pointer;
+}
+
+.secret-panel-image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border: 1px solid rgba(136, 255, 158, 0.18);
+}
+
 .crt-shell[data-screen-tone="amber"] {
   --screen-bg-top: #100700;
   --screen-bg-mid: #1a0f02;

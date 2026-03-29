@@ -89,6 +89,9 @@ const SECRET_LOGIN_TOKENS = [
   };
 }).sort((left, right) => right.prefix.length - left.prefix.length);
 
+const SECRET_PANEL_TOKENS = new Set(["follow", "rabbit"]);
+const SECRET_PANEL_IMAGE_URL = "https://static1.srcdn.com/wordpress/wp-content/uploads/2021/12/white-rabbit-Cropped.jpg";
+
 export function parseCommand(rawInput) {
   const normalized = rawInput.trim();
   const parts = normalized.split(/\s+/).filter(Boolean);
@@ -353,6 +356,17 @@ function login(state, token) {
       lines: [secretMessage],
       action: null,
       voiceLines: [secretMessage],
+    };
+  }
+
+  if (SECRET_PANEL_TOKENS.has(normalizeToken(normalizedToken))) {
+    return {
+      lines: ["Panel signal accepted."],
+      action: "show-secret-panel",
+      payload: {
+        imageUrl: SECRET_PANEL_IMAGE_URL,
+      },
+      voiceLines: [],
     };
   }
 

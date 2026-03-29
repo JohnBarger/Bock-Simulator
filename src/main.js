@@ -42,6 +42,9 @@ const elements = {
   theater: document.querySelector("#theater-output"),
   subsystems: document.querySelector("#subsystems-output"),
   unlocks: document.querySelector("#unlock-output"),
+  secretPanel: document.querySelector("#secret-panel"),
+  secretPanelImage: document.querySelector("#secret-panel-image"),
+  secretPanelClose: document.querySelector("#secret-panel-close"),
 };
 
 const speaker = createAudioBus();
@@ -139,6 +142,13 @@ function bindEvents() {
     persistState();
   });
 
+  elements.secretPanelClose.addEventListener("click", hideSecretPanel);
+  elements.secretPanel.addEventListener("click", (event) => {
+    if (event.target === elements.secretPanel) {
+      hideSecretPanel();
+    }
+  });
+
   window.addEventListener("pointerdown", (event) => {
     if (!elements.audioMenu.open && !elements.screenMenu.open) {
       return;
@@ -230,6 +240,9 @@ async function handleSubmit(event) {
   } else if (result.action === "load-state" && result.payload) {
     Object.assign(state, deserializeState(result.payload));
     await writeLines(result.lines, "warn", { voiceLines: result.voiceLines });
+  } else if (result.action === "show-secret-panel" && result.payload?.imageUrl) {
+    showSecretPanel(result.payload.imageUrl);
+    await writeLines(result.lines, "default", { voiceLines: result.voiceLines });
   } else {
     await writeLines(result.lines, "default", { voiceLines: result.voiceLines });
   }
@@ -241,6 +254,17 @@ async function handleSubmit(event) {
   renderScreenControls();
   persistState();
   scheduleDemoMode();
+}
+
+function showSecretPanel(imageUrl) {
+  elements.secretPanelImage.src = imageUrl;
+  elements.secretPanelImage.alt = "White rabbit";
+  elements.secretPanel.hidden = false;
+}
+
+function hideSecretPanel() {
+  elements.secretPanel.hidden = true;
+  elements.secretPanelImage.removeAttribute("src");
 }
 
 async function writeLines(lines, tone = "default", options = {}) {

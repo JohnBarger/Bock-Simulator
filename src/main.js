@@ -258,7 +258,7 @@ async function handleSubmit(event) {
 
 function showSecretPanel(imageUrl) {
   elements.secretPanelImage.src = imageUrl;
-  elements.secretPanelImage.alt = "White rabbit";
+  elements.secretPanelImage.alt = "Secret token image";
   elements.secretPanel.hidden = false;
 }
 

@@ -52,8 +52,8 @@ const SECRET_LOGIN_TOKENS = [
   ["monk", "Greetings Monk. Why are you sitting here playing around when you could be getting your butt kicked by Bip?"],
   ["jeff", "Greetings Monk. Why are you sitting here playing around when you could be getting your butt kicked by Bip?"],
   ["mike", "Greetings Mike. Why are you sitting here playing around when you could be getting your butt kicked by Bip?"],
-  ["bip", "Greetings, Bip. Why are you sitting here playing around when you could be kicking your Dad’s butt?"],
-  ["james", "Greetings, Bip. Why are you sitting here playing around when you could be kicking your Dad’s butt?"],
+  ["bip", "Why are you wasting time here when you should be trying to block Bock on all your socials?"],
+  ["james", "Why are you wasting time here when you should be trying to block Bock on all your socials?"],
   ["john2", "Where’s Donnie? This token does not grant elevated privileges.  Have another drink."],
   ["chuck", "Ah a wild Florida Man has entered the chat. This token does not grant elevated privileges.  Have another drink."],
   ["larry", "IT Directors do IT better. This token does not grant elevated privileges.  Have another drink."],
@@ -78,6 +78,8 @@ const SECRET_LOGIN_TOKENS = [
   ["geek", "Ahhhhh.  It’s like looking in a mirror."],
   ["jeremy", "Greetings FireGod.  This token does not grant privileges.  But it does come with a message.  Blake and Zoey love you!"],
   ["retrojack", "Greetings RetroJack.  This token does not grant privileges.  But it does prove you are a GenX Grownup.  See you at the next M.U.L.E. School. Monday nights at 7pm Eastern."],
+  ["gxg", "Join the GenX Grownup Discord server at https://discord.gg/PaFxhc22g - Hope to see you at the next M.U.L.E. School. Monday nights at 7pm Eastern."],
+  ["ataritom2x00", "Greetings AtariTom2X00!  This token does not grant privileges.  But it does prove you are a GenX Grown up.  How about a nice game of chess?"],
 ].map(([token, message]) => {
   const normalizedToken = normalizeToken(token);
   return {

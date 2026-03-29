@@ -375,7 +375,7 @@ function login(state, token) {
   }
 
   const normalizedPhrase = normalizeToken(normalizedToken);
-  const panelImageUrl = SECRET_PANEL_TOKEN_IMAGE_MAP.get(normalizedPhrase);
+  const panelImageUrl = getPanelImageUrl(normalizedPhrase);
   if (panelImageUrl) {
     return {
       lines: ["Panel signal accepted."],
@@ -456,6 +456,21 @@ function getSecretTokenMessage(rawToken) {
   const normalizedInput = normalizeToken(rawToken);
   const entry = SECRET_LOGIN_TOKENS.find((item) => normalizedInput.startsWith(item.prefix));
   return entry?.message ?? null;
+}
+
+function getPanelImageUrl(normalizedPhrase) {
+  const exactMatch = SECRET_PANEL_TOKEN_IMAGE_MAP.get(normalizedPhrase);
+  if (exactMatch) {
+    return exactMatch;
+  }
+
+  for (const [token, imageUrl] of SECRET_PANEL_TOKEN_IMAGE_MAP) {
+    if (normalizedPhrase.includes(token)) {
+      return imageUrl;
+    }
+  }
+
+  return null;
 }
 
 function buildGameLines(state) {

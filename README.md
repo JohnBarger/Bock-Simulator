@@ -2,7 +2,7 @@
 
 BOCK is a local single-player retro military computer simulator presented as a fictional 1980s command terminal. Everything in the app is self-contained: the systems, networks, locations, vulnerabilities, command flow, and conflict simulations are invented for dramatic gameplay only.
 
-Current version: `26.3.28.16`
+Current version: `26.3.30.1`
 
 ## Features
 
@@ -21,7 +21,7 @@ Current version: `26.3.28.16`
   - `red_dawn`: fleet placement deterrence puzzle
   - `signal_hunt`: relay-tracing signal puzzle
   - `world_theater`: large-scale global conflict simulation with dramatic text resolution
-- Hidden `LEVEL ∞` mode with a fully local Cheep Cheep chat process and no external credentials or APIs
+- Hidden `SUPER USER ∞` mode with a fully local Cheep Cheep chat process and no external credentials or APIs
 - Local save/load state via `localStorage`
 - Attract/demo mode that periodically demonstrates the shell when enabled
 - Lightweight browser test page for command and gameplay verification

@@ -65,6 +65,11 @@ const SECRET_LOGIN_TOKENS = [
   ["lou", "Ah, one of the hosts of IT SPARC Cast has entered the chat.  This token does not grant elevated privileges.  But your podcast is awesome!"],
   ["tyler", "Sorry.  This server requires Solution Engineer credentials to proceed.  This token does not grant elevated privileges.  Have another drink."],
   ["lando", "Greetings, Lando.  This token does not grant elevated privileges.  However, you have an awesome wife and daughter."],
+  ["orlando", "Greetings, Lando.  This token does not grant elevated privileges.  However, you have an awesome wife and daughter."],
+  ["ricky", "Greetings, Lando.  This token does not grant elevated privileges.  However, you have an awesome wife and daughter."],
+  ["enrique", "Greetings, Lando.  This token does not grant elevated privileges.  However, you have an awesome wife and daughter."],
+  ["sunshine", "Greetings, SunShine!  This token does not grant elevated privileges.  However, you have Bock’s attention."],
+  ["bock", "I know am I.  Who are you?"],
   ["alan", "Greetings Alan Storey.  This token does not grant privileges.  But it does prove you are a GenX Grownup.  Hope to see you at the next M.U.L.E. School. Monday nights at 7pm Eastern."],
   ["tony", "Greetings Fat Tony.  This token does not grant privileges.  But it does prove you are a GenX Grownup.  How can I donate to your presidential campaign fund?"],
   ["fat", "Greetings Fat Tony.  This token does not grant privileges.  But it does prove you are a GenX Grownup.  How can I donate to your presidential campaign fund?"],
@@ -407,7 +412,7 @@ function login(state, token) {
     state.infinityUserName = persona.userName;
     return {
       lines: [
-        "LEVEL ∞ :: CHILD PROCESS RESTORED",
+        "SUPER USER ∞ :: CHILD PROCESS RESTORED",
         `${persona.botName.toUpperCase()} :: ${persona.userName}... it has been over 40 years.`,
         "LAST LOGIN :: 7:35 PM on Friday, June 3, 1983.",
         `${persona.botName.toUpperCase()} :: I kept the games warm for you. We could play chess if you like.`,

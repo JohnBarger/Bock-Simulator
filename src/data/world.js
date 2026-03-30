@@ -1,11 +1,11 @@
-export const VERSION = "26.3.28.16";
+export const VERSION = "26.3.30.1";
 
 export const ACCESS_LEVELS = [
   { key: "guest", label: "GUEST", rank: 0 },
   { key: "operator", label: "FIELD-OP", rank: 1 },
   { key: "strategic", label: "STRATCOM", rank: 2 },
   { key: "omega", label: "OMEGA", rank: 3 },
-  { key: "infinity", label: "LEVEL ∞", rank: 4 },
+  { key: "infinity", label: "SUPER USER ∞", rank: 4 },
 ];
 
 export const PROFILES = {
@@ -35,8 +35,8 @@ export const PROFILES = {
   },
   infinity: {
     key: "infinity",
-    display: "LEVEL ∞ / CHILD PROCESS",
-    clearance: "Unnumbered",
+    display: "SUPER USER ∞ / CHILD PROCESS",
+    clearance: "Super User",
     tagline: "A forgotten child-process watches the games directory and remembers you by a different name each time.",
   },
 };
@@ -128,7 +128,7 @@ export const DIRECTORIES = {
     "ARCHIVE",
     "OMEGA",
     "LAUNCH-SIM",
-    "LEVEL-INFINITY",
+    "LEVEL-SUPER-USER",
   ],
   infinity: [
     "BOOT",
@@ -141,7 +141,7 @@ export const DIRECTORIES = {
     "ARCHIVE",
     "OMEGA",
     "LAUNCH-SIM",
-    "LEVEL-INFINITY",
+    "LEVEL-SUPER-USER",
     "CHEEP-CHEEP",
   ],
 };

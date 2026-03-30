@@ -69,7 +69,8 @@ export function getGameIntro(gameId) {
   if (gameId === "chess") {
     return [
       "CHESS :: You are white. BOCK is black.",
-      "Use `move e2 e4`. This simulation tracks core movement, captures, and castling.",
+      "Use `move e2 e4`. Use `castle kingside` or `castle queenside` when legal.",
+      "This simulation tracks core movement, captures, and castling.",
       renderGridBoard(createChessBoard()),
     ];
   }
@@ -228,15 +229,32 @@ function handleCheckers(gameState, input) {
 
 function handleChess(gameState, input) {
   if (input === "board") return { lines: [renderGridBoard(gameState.board)], complete: false, nextState: gameState, voiceLines: [] };
-  if (!input.startsWith("move ")) return invalidGameInput(gameState, "Use `move e2 e4` to direct a piece.");
-  const [, from, to] = input.split(/\s+/);
+  let from;
+  let to;
+  let playerActionLabel = "";
+
+  if (input.startsWith("move ")) {
+    [, from, to] = input.split(/\s+/);
+    playerActionLabel = `White moves ${from?.toUpperCase()} to ${to?.toUpperCase()}.`;
+  } else if (input.startsWith("castle")) {
+    const [, side = "kingside"] = input.split(/\s+/);
+    if (!["kingside", "queenside"].includes(side)) {
+      return invalidGameInput(gameState, "Use `castle kingside` or `castle queenside`.");
+    }
+    from = "e1";
+    to = side === "kingside" ? "g1" : "c1";
+    playerActionLabel = `White castles ${side.toUpperCase()}.`;
+  } else {
+    return invalidGameInput(gameState, "Use `move e2 e4`, `castle kingside`, or `castle queenside`.");
+  }
+
   const move = applyChessMove(gameState.board, from, to, "w", gameState.chessMeta);
   if (!move.valid) return invalidGameInput(gameState, move.message);
 
   let board = move.board;
   let chessMeta = move.chessMeta ?? gameState.chessMeta;
-  const lines = [renderGridBoard(board), `White moves ${from.toUpperCase()} to ${to.toUpperCase()}.`];
-  const voiceLines = [`White moves ${from.toUpperCase()} to ${to.toUpperCase()}.`];
+  const lines = [renderGridBoard(board), playerActionLabel];
+  const voiceLines = [playerActionLabel];
   if (!findKing(board, "b")) return { lines: [...lines, "Black king removed from the theater. BOCK concedes this simplified war game."], complete: true, nextState: { ...gameState, board, chessMeta, over: true }, voiceLines: [...voiceLines, "Black king removed from the theater. Bock concedes this simplified war game."] };
 
   const aiMove = pickChessMove(board, "b", chessMeta);
@@ -286,7 +304,49 @@ function getTicTacToeWinner(board) {
 }
 
 function pickTicTacToeMove(board) {
-  return [4, 0, 2, 6, 8, 1, 3, 5, 7].find((index) => !board[index]);
+  const preferredMoveOrder = [4, 0, 2, 6, 8, 1, 3, 5, 7];
+  let bestScore = -Infinity;
+  let bestMove = null;
+
+  for (const move of preferredMoveOrder) {
+    if (board[move]) continue;
+    const simulation = [...board];
+    simulation[move] = "O";
+    const score = scoreTicTacToePosition(simulation, false, 0);
+    if (score > bestScore) {
+      bestScore = score;
+      bestMove = move;
+    }
+  }
+
+  return bestMove;
+}
+
+function scoreTicTacToePosition(board, isAiTurn, depth) {
+  const winner = getTicTacToeWinner(board);
+  if (winner === "O") return 10 - depth;
+  if (winner === "X") return depth - 10;
+  if (board.every(Boolean)) return 0;
+
+  if (isAiTurn) {
+    let best = -Infinity;
+    for (let index = 0; index < board.length; index += 1) {
+      if (board[index]) continue;
+      const simulation = [...board];
+      simulation[index] = "O";
+      best = Math.max(best, scoreTicTacToePosition(simulation, false, depth + 1));
+    }
+    return best;
+  }
+
+  let best = Infinity;
+  for (let index = 0; index < board.length; index += 1) {
+    if (board[index]) continue;
+    const simulation = [...board];
+    simulation[index] = "X";
+    best = Math.min(best, scoreTicTacToePosition(simulation, true, depth + 1));
+  }
+  return best;
 }
 
 function createCheckersBoard() {

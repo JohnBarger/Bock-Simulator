@@ -288,12 +288,18 @@ body {
   line-height: 1.55;
   scrollbar-width: thin;
   color: var(--glow);
+  text-shadow:
+    0 0 calc(1px * var(--phosphor-glow-intensity)) color-mix(in srgb, var(--glow) 50%, transparent),
+    0 0 calc(4px * var(--phosphor-glow-intensity)) color-mix(in srgb, var(--glow) 40%, transparent);
 }
 
 .terminal-line {
   white-space: pre-wrap;
   margin-bottom: 0.32rem;
-  text-shadow: 0 0 calc(12px * var(--phosphor-glow-intensity)) color-mix(in srgb, var(--glow) 35%, transparent);
+  text-shadow:
+    0 0 calc(1px * var(--phosphor-glow-intensity)) color-mix(in srgb, var(--glow) 70%, transparent),
+    0 0 calc(4px * var(--phosphor-glow-intensity)) color-mix(in srgb, var(--glow) 50%, transparent),
+    0 0 calc(10px * var(--phosphor-glow-intensity)) color-mix(in srgb, var(--glow) 35%, transparent);
 }
 
 .terminal-line.system {
@@ -322,6 +328,9 @@ body {
 .prompt-prefix {
   color: var(--bright);
   white-space: nowrap;
+  text-shadow:
+    0 0 calc(1px * var(--phosphor-glow-intensity)) color-mix(in srgb, var(--bright) 80%, transparent),
+    0 0 calc(6px * var(--phosphor-glow-intensity)) color-mix(in srgb, var(--glow) 40%, transparent);
 }
 
 .command-input {
@@ -332,6 +341,9 @@ body {
   color: var(--bright);
   font: inherit;
   letter-spacing: 0.04rem;
+  text-shadow:
+    0 0 calc(1px * var(--phosphor-glow-intensity)) color-mix(in srgb, var(--bright) 80%, transparent),
+    0 0 calc(6px * var(--phosphor-glow-intensity)) color-mix(in srgb, var(--glow) 40%, transparent);
 }
 
 .command-hints {

@@ -396,21 +396,19 @@ function applyCheckersMove(board, fromCell, toCell, side) {
 }
 
 function pickCheckersMove(board, side) {
-  const moves = [];
-  for (let row = 0; row < 8; row += 1) for (let col = 0; col < 8; col += 1) {
-    const piece = board[row][col];
-    if (piece === "." || (side === "r" ? !isRedChecker(piece) : !isBlackChecker(piece))) continue;
-    const from = formatGridCell(encodeCell(row, col, 8), 8);
-    for (const deltaCol of [-2, -1, 1, 2]) for (const deltaRow of [-2, -1, 1, 2]) {
-      const targetRow = row + deltaRow;
-      const targetCol = col + deltaCol;
-      if (targetRow < 0 || targetRow > 7 || targetCol < 0 || targetCol > 7) continue;
-      const to = formatGridCell(encodeCell(targetRow, targetCol, 8), 8);
-      const applied = applyCheckersMove(board, from, to, side);
-      if (applied.valid) moves.push({ from, to, board: applied.board, capture: Math.abs(deltaRow) === 2 });
+  const moves = getAllCheckersMoves(board, side);
+  if (!moves.length) return null;
+
+  let bestMove = null;
+  let bestScore = -Infinity;
+  for (const move of moves) {
+    const score = scoreCheckersPosition(move.board, side === "r" ? "b" : "r", 3, -Infinity, Infinity);
+    if (score > bestScore) {
+      bestScore = score;
+      bestMove = move;
     }
   }
-  return moves.find((move) => move.capture) ?? moves[0] ?? null;
+  return bestMove;
 }
 
 function createChessBoard() {
@@ -457,6 +455,87 @@ function applyChessMove(board, fromCell, toCell, side, chessMeta = createInitial
 }
 
 function pickChessMove(board, side, chessMeta = createInitialChessMeta()) {
+  const moves = getAllChessMoves(board, side, chessMeta);
+  if (!moves.length) return null;
+
+  let bestMove = null;
+  let bestScore = -Infinity;
+  for (const move of moves) {
+    const score = scoreChessPosition(move.board, side === "w" ? "b" : "w", move.chessMeta, 2, -Infinity, Infinity);
+    if (score > bestScore) {
+      bestScore = score;
+      bestMove = move;
+    }
+  }
+  return bestMove;
+}
+
+function getAllCheckersMoves(board, side) {
+  const moves = [];
+  for (let row = 0; row < 8; row += 1) for (let col = 0; col < 8; col += 1) {
+    const piece = board[row][col];
+    if (piece === "." || (side === "r" ? !isRedChecker(piece) : !isBlackChecker(piece))) continue;
+    const from = formatGridCell(encodeCell(row, col, 8), 8);
+    for (const deltaCol of [-2, -1, 1, 2]) for (const deltaRow of [-2, -1, 1, 2]) {
+      const targetRow = row + deltaRow;
+      const targetCol = col + deltaCol;
+      if (targetRow < 0 || targetRow > 7 || targetCol < 0 || targetCol > 7) continue;
+      const to = formatGridCell(encodeCell(targetRow, targetCol, 8), 8);
+      const applied = applyCheckersMove(board, from, to, side);
+      if (applied.valid) {
+        moves.push({ from, to, board: applied.board, capture: Math.abs(deltaRow) === 2 });
+      }
+    }
+  }
+  const captures = moves.filter((move) => move.capture);
+  return captures.length ? captures : moves;
+}
+
+function scoreCheckersPosition(board, sideToMove, depth, alpha, beta) {
+  const perspective = "b";
+  const ownPieces = countPieces(board, sideToMove === "r" ? isRedChecker : isBlackChecker);
+  const enemyPieces = countPieces(board, sideToMove === "r" ? isBlackChecker : isRedChecker);
+  if (!ownPieces || !enemyPieces || depth === 0) {
+    return evaluateCheckersBoard(board, perspective);
+  }
+
+  const moves = getAllCheckersMoves(board, sideToMove);
+  if (!moves.length) {
+    return evaluateCheckersBoard(board, perspective);
+  }
+
+  const maximizing = sideToMove === perspective;
+  let best = maximizing ? -Infinity : Infinity;
+  for (const move of moves) {
+    const nextScore = scoreCheckersPosition(move.board, sideToMove === "r" ? "b" : "r", depth - 1, alpha, beta);
+    if (maximizing) {
+      best = Math.max(best, nextScore);
+      alpha = Math.max(alpha, best);
+    } else {
+      best = Math.min(best, nextScore);
+      beta = Math.min(beta, best);
+    }
+    if (beta <= alpha) break;
+  }
+  return best;
+}
+
+function evaluateCheckersBoard(board, perspective) {
+  let score = 0;
+  for (let row = 0; row < 8; row += 1) for (let col = 0; col < 8; col += 1) {
+    const piece = board[row][col];
+    if (piece === ".") continue;
+    const isPerspectivePiece = perspective === "r" ? isRedChecker(piece) : isBlackChecker(piece);
+    const value = piece === piece.toUpperCase() ? 1.75 : 1;
+    const advancement = perspective === "r" ? row : 7 - row;
+    const centrality = 3.5 - Math.abs(col - 3.5);
+    const pieceScore = value + advancement * 0.08 + centrality * 0.04;
+    score += isPerspectivePiece ? pieceScore : -pieceScore;
+  }
+  return score;
+}
+
+function getAllChessMoves(board, side, chessMeta = createInitialChessMeta()) {
   const moves = [];
   for (let fromRow = 0; fromRow < 8; fromRow += 1) for (let fromCol = 0; fromCol < 8; fromCol += 1) {
     const piece = board[fromRow][fromCol];
@@ -465,16 +544,59 @@ function pickChessMove(board, side, chessMeta = createInitialChessMeta()) {
       const from = formatGridCell(encodeCell(fromRow, fromCol, 8), 8);
       const to = formatGridCell(encodeCell(toRow, toCol, 8), 8);
       const applied = applyChessMove(board, from, to, side, chessMeta);
-      if (applied.valid) moves.push({
-        from,
-        to,
-        board: applied.board,
-        chessMeta: applied.chessMeta,
-        score: pieceValue(board[toRow][toCol]) + (isCastlingMove(fromRow, fromCol, toRow, toCol, piece) ? 0.25 : 0),
-      });
+      if (applied.valid) {
+        const captureValue = pieceValue(board[toRow][toCol]);
+        const castlingBonus = isCastlingMove(fromRow, fromCol, toRow, toCol, piece) ? 0.4 : 0;
+        moves.push({
+          from,
+          to,
+          board: applied.board,
+          chessMeta: applied.chessMeta,
+          immediateScore: captureValue + castlingBonus,
+        });
+      }
     }
   }
-  return moves.sort((left, right) => right.score - left.score)[0] ?? null;
+  return moves.sort((left, right) => right.immediateScore - left.immediateScore);
+}
+
+function scoreChessPosition(board, sideToMove, chessMeta, depth, alpha, beta) {
+  if (!findKing(board, "w")) return 9999;
+  if (!findKing(board, "b")) return -9999;
+  if (depth === 0) return evaluateChessBoard(board, "b");
+
+  const moves = getAllChessMoves(board, sideToMove, chessMeta);
+  if (!moves.length) return evaluateChessBoard(board, "b");
+
+  const maximizing = sideToMove === "b";
+  let best = maximizing ? -Infinity : Infinity;
+  for (const move of moves) {
+    const score = scoreChessPosition(move.board, sideToMove === "w" ? "b" : "w", move.chessMeta, depth - 1, alpha, beta);
+    if (maximizing) {
+      best = Math.max(best, score);
+      alpha = Math.max(alpha, best);
+    } else {
+      best = Math.min(best, score);
+      beta = Math.min(beta, best);
+    }
+    if (beta <= alpha) break;
+  }
+  return best;
+}
+
+function evaluateChessBoard(board, perspective) {
+  let score = 0;
+  for (let row = 0; row < 8; row += 1) for (let col = 0; col < 8; col += 1) {
+    const piece = board[row][col];
+    if (piece === ".") continue;
+    const isPerspectivePiece = perspective === "w" ? piece === piece.toLowerCase() : piece === piece.toUpperCase();
+    const material = pieceValue(piece);
+    const centrality = (3.5 - Math.abs(col - 3.5)) * 0.06 + (3.5 - Math.abs(row - 3.5)) * 0.04;
+    const mobilityBias = piece.toLowerCase() === "p" ? 0 : 0.1;
+    const pieceScore = material + centrality + mobilityBias;
+    score += isPerspectivePiece ? pieceScore : -pieceScore;
+  }
+  return score;
 }
 
 function isLegalChessMove(board, fromRow, fromCol, toRow, toCol, piece, chessMeta) {

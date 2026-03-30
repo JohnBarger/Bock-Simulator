@@ -1,4 +1,4 @@
-export const VERSION = "26.3.30.1";
+export const VERSION = "26.3.30.2";
 
 export const ACCESS_LEVELS = [
   { key: "guest", label: "GUEST", rank: 0 },

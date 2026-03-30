@@ -53,10 +53,13 @@ let typingTimer = null;
 let demoTimer = null;
 let historyIndex = null;
 let historyDraft = "";
+let shellHistorySnapshot = [];
+let gameHistory = [];
 
 initialize();
 
 function initialize() {
+  shellHistorySnapshot = [...state.commandHistory];
   renderSidebar();
   renderDemoButton();
   renderAudioControls();
@@ -111,19 +114,19 @@ function bindEvents() {
     persistState();
   });
 
-  elements.screenAmber.addEventListener("change", () => {
+  elements.screenAmber?.addEventListener("change", () => {
     state.screenTone = elements.screenAmber.checked ? "amber" : "green";
     renderScreenControls();
     persistState();
   });
 
-  elements.phosphorGlow.addEventListener("input", () => {
+  elements.phosphorGlow?.addEventListener("input", () => {
     state.phosphorGlow = clampPhosphorGlow(Number(elements.phosphorGlow.value));
     renderScreenControls();
     persistState();
   });
 
-  elements.scanlineStrength.addEventListener("input", () => {
+  elements.scanlineStrength?.addEventListener("input", () => {
     state.scanlineStrength = Number(elements.scanlineStrength.value);
     renderScreenControls();
     persistState();
@@ -150,27 +153,27 @@ function bindEvents() {
   });
 
   window.addEventListener("pointerdown", (event) => {
-    if (!elements.audioMenu.open && !elements.screenMenu.open) {
+    if (!elements.audioMenu.open && !elements.screenMenu?.open) {
       return;
     }
 
     if (!elements.audioMenu.contains(event.target)) {
       elements.audioMenu.open = false;
     }
-    if (!elements.screenMenu.contains(event.target)) {
+    if (elements.screenMenu && !elements.screenMenu.contains(event.target)) {
       elements.screenMenu.open = false;
     }
   });
 
   window.addEventListener("focusin", (event) => {
-    if (!elements.audioMenu.open && !elements.screenMenu.open) {
+    if (!elements.audioMenu.open && !elements.screenMenu?.open) {
       return;
     }
 
     if (!elements.audioMenu.contains(event.target)) {
       elements.audioMenu.open = false;
     }
-    if (!elements.screenMenu.contains(event.target)) {
+    if (elements.screenMenu && !elements.screenMenu.contains(event.target)) {
       elements.screenMenu.open = false;
     }
   });
@@ -226,7 +229,13 @@ async function handleSubmit(event) {
     return;
   }
 
-  state.commandHistory = pushHistory(state.commandHistory, input, 10);
+  if (state.currentGame) {
+    gameHistory = pushHistory(gameHistory, input, 10);
+    state.commandHistory = [...gameHistory];
+  } else {
+    state.commandHistory = pushHistory(state.commandHistory, input, 10);
+    shellHistorySnapshot = [...state.commandHistory];
+  }
   historyIndex = null;
   historyDraft = "";
   await writeLines([`${getPrompt(state)} ${input}`], "system", { speak: false });
@@ -234,6 +243,12 @@ async function handleSubmit(event) {
   speaker.chirp("keypress");
 
   const result = executeCommand(state, input);
+  if (!state.currentGame && gameHistory.length) {
+    gameHistory = [];
+    state.commandHistory = [...shellHistorySnapshot];
+  } else if (state.currentGame && gameHistory.length) {
+    state.commandHistory = [...gameHistory];
+  }
 
   if (result.action === "clear") {
     elements.output.innerHTML = "";
@@ -272,10 +287,10 @@ async function writeLines(lines, tone = "default", options = {}) {
     return;
   }
 
-  const voiceLineSet = new Set(options.voiceLines ?? []);
+  const voiceLineSet = new Set((options.voiceLines ?? []).map(normalizeVoiceMatch));
   for (const line of lines) {
     await typeLine(line, tone, {
-      speak: voiceLineSet.has(line),
+      speak: voiceLineSet.has(normalizeVoiceMatch(line)),
     });
   }
 
@@ -284,6 +299,15 @@ async function writeLines(lines, tone = "default", options = {}) {
       voice.speak(line);
     }
   }
+}
+
+function normalizeVoiceMatch(line) {
+  return String(line ?? "")
+    .replace(/`/g, "")
+    .replace(/\bBOCK\b/g, "Bock")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
 }
 
 function typeLine(line, tone, options = {}) {
@@ -423,6 +447,9 @@ function renderAudioControls() {
 }
 
 function renderScreenControls() {
+  if (!elements.screenAmber || !elements.screenToneLabel || !elements.phosphorGlow || !elements.phosphorGlowValue || !elements.scanlineStrength || !elements.scanlineStrengthValue) {
+    return;
+  }
   state.phosphorGlow = clampPhosphorGlow(state.phosphorGlow);
   elements.screenAmber.checked = state.screenTone === "amber";
   elements.screenToneLabel.textContent = state.screenTone === "amber" ? "GREEN SCREEN" : "AMBER SCREEN";
@@ -587,7 +614,8 @@ function handleInputKeydown(event) {
     if (historyIndex === null) {
       historyDraft = elements.input.value;
     }
-    const next = navigateHistory(state.commandHistory, historyDraft, historyIndex, "up");
+    const activeHistory = state.currentGame ? gameHistory : state.commandHistory;
+    const next = navigateHistory(activeHistory, historyDraft, historyIndex, "up");
     historyIndex = next.nextIndex;
     historyDraft = next.nextDraft;
     elements.input.value = next.nextValue;
@@ -597,7 +625,8 @@ function handleInputKeydown(event) {
 
   if (event.key === "ArrowDown") {
     event.preventDefault();
-    const next = navigateHistory(state.commandHistory, historyDraft, historyIndex, "down");
+    const activeHistory = state.currentGame ? gameHistory : state.commandHistory;
+    const next = navigateHistory(activeHistory, historyDraft, historyIndex, "down");
     historyIndex = next.nextIndex;
     historyDraft = next.nextDraft;
     elements.input.value = next.nextValue;
